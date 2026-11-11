@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>詩景 ― 萩原朔太郎「竹」</title>
-<meta name="description" content="詩に、景色と音を。一編ずつ、その詩のための映像と音楽をコードで仕立てて上演します。第1回は萩原朔太郎「竹」（生誕140年）。光る地面から地下の根へ、そして竹とともに青空へ。">
+<title>詩景 ― 北原白秋「落葉松」</title>
+<meta name="description" content="詩に、景色と音を。一編ずつ、その詩のための映像と音楽をコードで仕立てて上演します。第2回は北原白秋「落葉松」。霧の落葉松林を歩く八連を、水墨の濃淡と、字の現れる速さで。">
 <meta property="og:type" content="website">
-<meta property="og:title" content="詩景 ― 萩原朔太郎「竹」">
-<meta property="og:description" content="詩に、景色と音を。一編ずつ、その詩のための映像と音楽をコードで仕立てて上演します。第1回は萩原朔太郎「竹」（生誕140年）。光る地面から地下の根へ、そして竹とともに青空へ。">
+<meta property="og:title" content="詩景 ― 北原白秋「落葉松」">
+<meta property="og:description" content="詩に、景色と音を。一編ずつ、その詩のための映像と音楽をコードで仕立てて上演します。第2回は北原白秋「落葉松」。霧の落葉松林を歩く八連を、水墨の濃淡と、字の現れる速さで。">
 <meta name="twitter:card" content="summary_large_image">
 <meta property="og:url" content="https://shikei-jp.github.io/">
-<meta property="og:image" content="https://shikei-jp.github.io/og_take.png">
+<meta property="og:image" content="https://shikei-jp.github.io/og_karamatsu.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@500;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
@@ -61,6 +61,7 @@ button.program:hover{border-color:var(--dim)}
 .line{writing-mode:vertical-rl;font-family:var(--display);font-weight:700;font-size:calc(var(--u) * var(--fs));letter-spacing:.14em;line-height:1;color:#fff4e6;text-shadow:0 0 calc(var(--u)*14) rgba(20,10,20,.55),0 0 calc(var(--u)*3) rgba(20,10,20,.5);opacity:0;will-change:opacity,transform,filter}
 .line rt{font-size:.36em;font-weight:500;letter-spacing:.05em}
 .line .ch{opacity:0}
+.line .ch rt{opacity:0}
 .group.tone-sea{top:8%;right:8%}
 .group.tone-sea .line{color:#dcf0f3;text-shadow:0 0 calc(var(--u)*16) rgba(0,10,25,.8)}
 .group.tone-sepia .line{color:#f4e5c6;text-shadow:0 0 calc(var(--u)*12) rgba(30,18,6,.75)}
@@ -73,7 +74,7 @@ button.program:hover{border-color:var(--dim)}
 .title-card .tt{writing-mode:vertical-rl;font-family:var(--display);font-weight:800;font-size:calc(var(--u)*78);letter-spacing:.3em;margin:0;line-height:1;color:#fff6ea;text-shadow:0 0 calc(var(--u)*24) rgba(30,10,30,.6)}
 .title-card .ta{writing-mode:vertical-rl;font-family:var(--display);font-weight:500;font-size:calc(var(--u)*22);letter-spacing:.35em;margin:calc(var(--u)*70) 0 0;color:#fff0de;text-shadow:0 0 calc(var(--u)*12) rgba(30,10,30,.6)}
 .credit{position:absolute;left:8%;right:8%;bottom:22%;text-align:center;font-family:var(--display);font-size:calc(var(--u)*15);line-height:1.9;color:#cfd6dc;opacity:0;margin:0}
-.credit small{display:block;font-family:var(--ui);font-size:calc(var(--u)*11.5);color:#8d97a6;letter-spacing:.06em}
+.credit small{display:block;font-family:var(--ui);font-size:calc(var(--u)*11.5);color:#a3adba;letter-spacing:.06em}
 .big-play{position:absolute;left:50%;bottom:11%;transform:translateX(-50%);display:inline-flex;align-items:center;gap:10px;padding:12px 26px 12px 20px;border-radius:999px;border:1px solid rgba(255,240,225,.55);background:rgba(12,10,18,.45);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);font-family:var(--display);font-weight:700;font-size:17px;letter-spacing:.2em;cursor:pointer;white-space:nowrap}
 .big-play svg{width:14px;height:14px}
 .big-play[hidden]{display:none}
@@ -132,6 +133,8 @@ body.film .brand,body.film .programs,body.film .notes,body.film .controls,body.f
 body.film .app{display:block;padding:0;max-width:none;min-height:0}
 body.film .theater{display:block}
 body.film .rig{width:100vw}
+body.film .credit{font-size:calc(var(--u)*21);bottom:40%}
+body.film .credit small{font-size:calc(var(--u)*13.5);margin-top:.5em;line-height:2}
 body.film .stage{width:100vw;height:100vh;aspect-ratio:auto;border-radius:0;box-shadow:none}
 </style>
 </head>
@@ -1401,8 +1404,490 @@ const TakeScore = {
   };
 }
 
+/* ===================== 落葉松：本文と、声に出す時間 ===================== */
+// 全八連・各四行。どの行も「五音＋七音」の十二音（五七調）。
+const KARA_TEXT = [
+  ["からまつの林を過ぎて、", "からまつをしみじみと見き。", "からまつはさびしかりけり。", "たびゆくはさびしかりけり。"],
+  ["からまつの林を<ruby>出<rt>い</rt></ruby>でて、", "からまつの林に<ruby>入<rt>い</rt></ruby>りぬ。", "からまつの林に<ruby>入<rt>い</rt></ruby>りて、", "また細く道はつづけり。"],
+  ["からまつの林の<ruby>奥<rt>おく</rt></ruby>も", "わが通る道はありけり。", "<ruby>霧雨<rt>きりさめ</rt></ruby>のかかる道なり。", "<ruby>山風<rt>やまかぜ</rt></ruby>のかよふ道なり。"],
+  ["からまつの林の道は", "われのみか、ひともかよひぬ。", "ほそぼそと通ふ道なり。", "さびさびといそぐ道なり。"],
+  ["からまつの林を過ぎて、", "ゆゑしらず歩みひそめつ。", "からまつはさびしかりけり、", "からまつとささやきにけり。"],
+  ["からまつの林を<ruby>出<rt>い</rt></ruby>でて、", "<ruby>浅間嶺<rt>あさまね</rt></ruby>にけぶり立つ見つ。", "<ruby>浅間嶺<rt>あさまね</rt></ruby>にけぶり立つ見つ。", "からまつのまたそのうへに。"],
+  ["からまつの林の雨は", "さびしけどいよよしづけし。", "かんこ鳥鳴けるのみなる。", "からまつの濡るるのみなる。"],
+  ["世の中よ、あはれなりけり。", "<ruby>常<rt>つね</rt></ruby>なけどうれしかりけり。", "山川に山がはの音、", "からまつにからまつのかぜ。"]
+];
+// 読む速さ：一音 0.135 秒。五音のあとに小さな間。句読点で間をとり、句読点のない行は次の行へすぐ流れる
+// 後半はゆっくり：五連（理由もなく歩みをひそめる所）から一行ごとに読む速さを落とし、最後の行は一音およそ 0.19 秒（間も同じ割合でのびる）
+const KARA_MORA = 0.135, KARA_PH = 0.16, KARA_GAP = 1.3;
+const KARA_PACE = i => (i < 16 ? 1 : 1.1 + 0.3 * (i - 16) / 15);
+const KARA_KANJI = { "林": 3, "過": 1, "見": 1, "細": 2, "道": 2, "通": 2, "歩": 2, "立": 1, "雨": 2, "鳥": 2, "鳴": 1, "濡": 1, "世": 1, "中": 2, "山": 2, "川": 2, "音": 2 };
+function karaUnits(html) {
+  const out = [], re = /<ruby>(.*?)<rt>(.*?)<\/rt><\/ruby>|([^<])/g; let m;
+  while ((m = re.exec(html))) {
+    if (m[3] !== undefined) { const ch = m[3], punct = "、。".includes(ch) ? ch : ""; out.push({ html: ch, mora: punct ? 0 : (KARA_KANJI[ch] || 1), punct }); }
+    else out.push({ html: `<ruby>${m[1]}<rt>${m[2]}</rt></ruby>`, mora: [...m[2]].length, punct: "" });
+  }
+  return out;
+}
+const KARA_T = (() => {
+  let t = 4.0; const lines = [], stanza = [];
+  KARA_TEXT.forEach((st, k) => {
+    if (k > 0) t += KARA_GAP * KARA_PACE(k * 4);
+    stanza.push(t);
+    st.forEach((html, j) => {
+      const f = KARA_PACE(k * 4 + j), units = karaUnits(html), times = []; let c = t, morae = 0, ph2 = null, paused = false;
+      for (const u of units) {
+        if (paused && ph2 === null && u.mora > 0) ph2 = c;
+        times.push(c); c += u.mora * KARA_MORA * f; morae += u.mora;
+        if (!paused && morae >= 5) { c += KARA_PH * f; paused = true; }
+        if (u.punct === "、" && units[units.length - 1] !== u) c += 0.12 * f;
+      }
+      const last = units[units.length - 1].punct;
+      lines.push({ t, g: k, j, html, units, times, end: c, ph2: ph2 || t + 0.8 });
+      t = c + (last === "。" ? 0.8 : last === "、" ? 0.55 : 0.3) * f;
+    });
+  });
+  lines.forEach((l, i) => { l.next = i + 1 < lines.length ? lines[i + 1].t : t; });
+  return { lines, stanza, end: t };
+})();
+const KS = k => (k <= 8 ? KARA_T.stanza[k - 1] : KARA_T.end);
+const KL = (k, j) => KARA_T.lines[(k - 1) * 4 + j];
+const KARA_END = KARA_T.end, KARA_DUR = +(KARA_END + 11.5).toFixed(2);
+
+/* ===================== 映像：落葉松 ===================== */
+const KaramatsuScene = (() => {
+  const R = mulberry(19211101), rnd = (a = 0, b = 1) => a + (b - a) * R();
+  const F = 520, CAMH = 1.6;
+  const GO = KL(5, 3).end + 0.3, ARR = KL(6, 1).t + 0.8;
+  const speed = t => {
+    if (t < KS(1) - 0.2) return 0.35;
+    if (t < KS(5)) return 1.0;
+    if (t < KL(5, 1).end) return lerp(1.0, 0, ss(KS(5), KL(5, 1).end, t));
+    if (t < GO) return 0;
+    // 六連：五連の終わりからまた歩き出して林を出る。二行目の頭で林のはずれに着き、そのあとは、ごくゆっくり前へ
+    return lerp(0.05, 1.4, ss(GO, GO + 1.6, t) * (1 - ss(ARR - 2.0, ARR, t)));
+  };
+  const NZ = Math.ceil((KARA_DUR + 2) / 0.05), ZT = [0];
+  for (let i = 1; i <= NZ; i++) ZT.push(ZT[i - 1] + speed((i - 0.5) * 0.05) * 0.05);
+  const Zat = t => { const i = clamp(t / 0.05, 0, NZ - 0.001), a = Math.floor(i); return lerp(ZT[a], ZT[a + 1], i - a); };
+  const ZC1 = Zat(KL(2, 0).t) + 1.2, ZC2 = Zat(KL(2, 1).t + 1.0) + 1.2, ZF = Zat(ARR) + 1.5, ZEDGE = Zat(ARR) + 7.0;
+  const pc = z => 0.9 * Math.sin(z * 0.06) + 0.4 * Math.sin(z * 0.021);
+  const halfW = z => (z < ZC2 + 2 ? lerp(0.72, 0.52, ss(ZC2 - 2, ZC2 + 2, z)) : lerp(0.52, 0.42, ss(ZF - 2, ZEDGE, z)));   // 幅は段にせず、なだらかに変える
+
+  /* ---- 墨の筆致でつくる型（同じ形で、緑と金の二色） ---- */
+  const INK = "38,36,30", GREEN = "86,106,66", GOLD = "208,154,54";
+  function branchSprite(seed, col) {
+    const r = mulberry(seed), rn = (a, b) => a + (b - a) * r();
+    const c = document.createElement("canvas"); c.width = 320; c.height = 128; const x = c.getContext("2d");
+    const by = 44, pt = u => [8 + u * 300, by + 22 * Math.sin(u * Math.PI * 0.85) - 20 * u * u];
+    x.lineCap = "round";
+    for (let i = 1; i <= 24; i++) { const [x0, y0] = pt((i - 1) / 24), [x1, y1] = pt(i / 24); x.strokeStyle = `rgba(${INK},${0.8 - 0.45 * i / 24})`; x.lineWidth = 3.4 * (1 - i / 28) + 0.5; x.beginPath(); x.moveTo(x0, y0); x.lineTo(x1, y1); x.stroke(); }
+    const tufts = [];
+    for (let u = 0.1; u <= 1.0; u += rn(0.03, 0.045)) tufts.push(pt(u));
+    for (let k = 0; k < 6; k++) {
+      const [sx, sy] = pt(rn(0.2, 0.85)), len = rn(36, 80); let px = sx, py = sy, a = rn(0.25, 0.8);
+      x.strokeStyle = `rgba(${INK},0.45)`; x.lineWidth = 1.2; x.beginPath(); x.moveTo(px, py);
+      for (let s = 0; s < 8; s++) { a -= 0.05; px += Math.cos(a) * len / 8; py += Math.sin(a) * len / 8; x.lineTo(px, py); if (s % 2) tufts.push([px, py]); }
+      x.stroke();
+    }
+    for (const [tx, ty] of tufts) {
+      const hz = x.createRadialGradient(tx, ty - 4, 0, tx, ty - 4, 11); hz.addColorStop(0, `rgba(${col},0.22)`); hz.addColorStop(1, `rgba(${col},0)`);
+      x.fillStyle = hz; x.beginPath(); x.arc(tx, ty - 4, 11, 0, Math.PI * 2); x.fill();
+      const n = Math.floor(rn(10, 17));
+      for (let q = 0; q < n; q++) { const a = -Math.PI / 2 + rn(-1.25, 1.25), l = rn(6, 12); x.strokeStyle = `rgba(${col},${rn(0.35, 0.75)})`; x.lineWidth = rn(0.8, 1.3); x.beginPath(); x.moveTo(tx, ty); x.lineTo(tx + Math.cos(a) * l, ty + Math.sin(a) * l); x.stroke(); }
+    }
+    return c;
+  }
+  const BR = [0, 1, 2, 3].map(i => ({ g: branchSprite(100 + i, GREEN), y: branchSprite(100 + i, GOLD) }));
+  function treeSprite(seed, key) {
+    const r = mulberry(seed), rn = (a, b) => a + (b - a) * r();
+    const c = document.createElement("canvas"); c.width = 300; c.height = 880; const x = c.getContext("2d");
+    const cx = 150, base = 880, h = 860;
+    // 幹：近くの木と同じ色（ふちは墨、まん中は明るい樹皮）。梢の中でも上まで通して見せる
+    const col = key === "g" ? GREEN : GOLD, bark = key === "g" ? "96,88,76" : "128,104,72";
+    const tg = x.createLinearGradient(cx - 7, 0, cx + 7, 0); tg.addColorStop(0, `rgba(${INK},0.9)`); tg.addColorStop(0.55, `rgba(${bark},1)`); tg.addColorStop(1, `rgba(${INK},0.85)`);
+    const trunk = () => { x.fillStyle = tg; x.beginPath(); x.moveTo(cx - 8.5, base); x.lineTo(cx - 6.5, base - 0.03 * h); x.lineTo(cx - 1.4, base - h); x.lineTo(cx + 1.4, base - h); x.lineTo(cx + 6.5, base - 0.03 * h); x.lineTo(cx + 8.5, base); x.closePath(); x.fill(); };
+    trunk();
+    for (let hm = 0.28; hm < 0.995; hm += rn(0.016, 0.024)) {
+      const u = (hm - 0.28) / 0.72, L = (112 * Math.pow(1 - u, 0.8) + 12) * rn(0.82, 1.1) * (0.3 + 0.7 * ss(0, 0.16, u)), y = base - hm * h;
+      const wash = x.createRadialGradient(cx, y - 6, 0, cx, y - 6, L * 1.05);
+      wash.addColorStop(0, `rgba(${col},0.26)`); wash.addColorStop(1, `rgba(${col},0)`);
+      x.fillStyle = wash; x.beginPath(); x.ellipse(cx, y - 6, L * 1.05, L * 0.32, 0, 0, Math.PI * 2); x.fill();
+      for (const side of [-1, 1]) for (const back of [0, 1]) {
+        const sp = BR[Math.floor(rn(0, 4))][key], Lb = L * (back ? 0.62 : 1);
+        x.save(); x.translate(cx, y - back * 4); x.scale(side, 1); x.rotate(rn(-0.12, 0.08) - back * 0.12); x.globalAlpha = back ? 0.7 : 1;
+        x.drawImage(sp, 0, -Lb * 0.375 * 44 / 128, Lb, Lb * 0.375); x.restore();
+      }
+    }
+    x.globalAlpha = 0.6; trunk(); x.globalAlpha = 1;
+    return c;
+  }
+  const TS = [0, 1, 2, 3].map(i => ({ g: treeSprite(200 + i, "g"), y: treeSprite(200 + i, "y") }));
+  function grassSprite(seed, col) {
+    const r = mulberry(seed), rn = (a, b) => a + (b - a) * r();
+    const c = document.createElement("canvas"); c.width = 160; c.height = 80; const x = c.getContext("2d"); x.lineCap = "round";
+    for (let i = 0; i < 26; i++) {
+      const bx = rn(10, 150), lean = rn(-0.9, 0.9), len = rn(24, 66), by = 80 - rn(0, 12) * (1 - Math.abs(bx - 80) / 90);
+      x.strokeStyle = `rgba(${i % 3 ? col : INK},${rn(0.35, 0.7)})`; x.lineWidth = rn(1, 2.2);
+      x.beginPath(); x.moveTo(bx, by); x.quadraticCurveTo(bx + lean * len * 0.3, by - len * 0.6, bx + lean * len * 0.8, by - len); x.stroke();
+    }
+    x.globalCompositeOperation = "destination-out"; const fd = x.createLinearGradient(0, 62, 0, 80); fd.addColorStop(0, "rgba(0,0,0,0)"); fd.addColorStop(1, "rgba(0,0,0,1)"); x.fillStyle = fd; x.fillRect(0, 62, 160, 18);
+    x.globalCompositeOperation = "source-over";
+    return c;
+  }
+  const GR = [0, 1, 2].map(i => ({ g: grassSprite(300 + i, GREEN), y: grassSprite(300 + i, GOLD) }));
+
+  /* ---- 林：落葉松と下草を、遠い順に ---- */
+  const objs = [];
+  for (let z = 1.5; z < ZF; z += rnd(0.12, 0.32)) {
+    if (z > ZC1 && z < ZC2) continue;
+    const side = R() < 0.5 ? -1 : 1, x = pc(z) + side * (1.1 + Math.pow(rnd(), 1.6) * 11);
+    objs.push({ kind: "tree", x, z, h: rnd(15, 22), w: rnd(0.16, 0.28), ph: rnd(0, 6.28), elev: 0, sp: Math.floor(rnd(0, 4)), lean: rnd(-0.015, 0.015) });
+  }
+  // 林のはずれの先：下っていく斜面の落葉松。梢がだんだん低くなり、その上に浅間山が見える
+  for (let i = 0; i < 230; i++) {
+    const d = 4 + Math.pow(rnd(), 0.8) * 72, z = ZEDGE + d, x = pc(ZEDGE) + rnd(-46, 46);
+    if (d < 24 && Math.abs(x - pc(ZEDGE)) < 0.3 * (d + 6) + 1.5) continue;   // まん中は空けて、山と煙を見せる
+    objs.push({ kind: "tree", x, z, h: rnd(14, 21), w: 0.25, ph: rnd(0, 6.28), elev: -d * 0.42 - 2, sp: Math.floor(rnd(0, 4)), lean: 0, below: true });
+  }
+  for (const [dx, d, h, sp] of [[-5.6, 5, 21, 0], [-8.4, 9, 19, 2], [7.4, 7, 20, 1], [10.5, 13, 18, 3], [-12, 16, 18, 1], [-3.4, 30, 17, 2], [4.6, 38, 17, 0]]) objs.push({ kind: "tree", x: pc(ZEDGE) + dx, z: ZEDGE + d, h, w: 0.25, ph: 0, elev: -d * 0.42 - 2, sp, lean: 0, below: true });
+  // 道ばたの草：小径のふちにかぶさるように多め、外側はまばらに
+  for (let z = 0.6; z < ZEDGE - 0.15; z += rnd(0.1, 0.22)) { const side = R() < 0.5 ? -1 : 1; objs.push({ kind: "grass", x: pc(z) + side * (halfW(z) + rnd(-0.1, 0.45)), z, s: rnd(0.6, 1.1), sp: Math.floor(rnd(0, 3)), flip: R() < 0.5 }); }
+  for (let z = 0.8; z < ZEDGE - 0.15; z += rnd(0.25, 0.5)) { const side = R() < 0.5 ? -1 : 1; objs.push({ kind: "grass", x: pc(z) + side * rnd(1.2, 3.6), z, s: rnd(0.7, 1.3), sp: Math.floor(rnd(0, 3)), flip: R() < 0.5 }); }
+  for (let i = 0; i < 260; i++) { const z = rnd(ZF - 3, ZEDGE - 0.1), x = pc(z) + (R() < 0.5 ? -1 : 1) * rnd(0.9, 15); objs.push({ kind: "grass", x, z, s: rnd(0.6, 1.3), sp: Math.floor(rnd(0, 3)), flip: R() < 0.5 }); }
+  for (let i = 0; i < 150; i++) { const z = ZEDGE - rnd(0.02, 0.5), x = pc(z) + rnd(-16, 16); objs.push({ kind: "grass", x, z, s: rnd(0.8, 1.6), sp: Math.floor(rnd(0, 3)), flip: R() < 0.5 }); }
+  objs.sort((a, b) => b.z - a.z);
+  const litter = Array.from({ length: 520 }, () => ({ z: rnd(0.5, ZEDGE), dx: rnd(-0.75, 0.75), a: rnd(0, 3.14), l: rnd(0.04, 0.09) }));
+  const stones = Array.from({ length: 90 }, () => ({ z: rnd(0.8, ZEDGE), dx: rnd(-0.5, 0.5), r: rnd(0.025, 0.07), sh: rnd(0.5, 0.8) }));
+  const puddles = Array.from({ length: 6 }, (_, i) => ({ z: ZEDGE - 1 - i * 1.25 - rnd(0, 0.6), dx: (i % 2 ? -0.28 : 0.26) + rnd(-0.03, 0.03), w: rnd(0.14, 0.2), l: rnd(0.8, 1.6) }));
+  const streaks = Array.from({ length: 220 }, () => ({ x: rnd(0, W), y: rnd(0, H), sp: rnd(0.8, 1.2), l: rnd(0.6, 1.4) }));
+  const needles = Array.from({ length: 260 }, () => ({ x: rnd(0, W), y: rnd(-H, H), vx: rnd(-90, -30), vy: rnd(30, 70), ph: rnd(0, 6.28), l: rnd(5, 11) }));
+  // 光の筋の下絵：横は縁がとけ、下へ消える（縁のまっすぐな帯にすると影に見える）
+  const beamSpr = (() => {
+    const c = document.createElement("canvas"); c.width = 64; c.height = 256; const x = c.getContext("2d");
+    const h = x.createLinearGradient(0, 0, 64, 0); for (let i = 0; i <= 16; i++) { const u = i / 16, a = Math.pow(Math.sin(u * Math.PI), 2); h.addColorStop(u, `rgba(255,226,160,${a.toFixed(3)})`); }
+    x.fillStyle = h; x.fillRect(0, 0, 64, 256);
+    const v = x.createLinearGradient(0, 0, 0, 256); v.addColorStop(0, "rgba(0,0,0,1)"); v.addColorStop(0.55, "rgba(0,0,0,0.45)"); v.addColorStop(1, "rgba(0,0,0,0)");
+    x.globalCompositeOperation = "destination-in"; x.fillStyle = v; x.fillRect(0, 0, 64, 256);
+    return c;
+  })();
+  const smoke = Array.from({ length: 36 }, (_, i) => ({ i, ph: rnd(0, 6.28), r: rnd(0.8, 1.2) }));
+  const BANDS = [55, 35, 22, 14, 9, 5.5, 3];
+
+  // 先を急ぐ人：中折れ帽にインバネス（大正の外套）。歩くたびに裾がひるがえる
+  function walkerFig(g, x, y, h, ph, col, a, rt) {
+    const lean = 0.07 * h, sw = Math.sin(ph), sw2 = Math.sin(ph + Math.PI);
+    g.save(); g.globalAlpha = a; g.fillStyle = col; g.strokeStyle = col; g.lineCap = "round"; g.lineJoin = "round";
+    // 足元の影
+    g.globalAlpha = a * 0.25; g.beginPath(); g.ellipse(x, y, 0.16 * h, 0.025 * h, 0, 0, Math.PI * 2); g.fill(); g.globalAlpha = a;
+    // 脚（膝を曲げて歩く）
+    const hip = [x + lean * 0.5, y - 0.48 * h];
+    for (const s of [sw, sw2]) {
+      const knee = [hip[0] + s * 0.07 * h, hip[1] + 0.24 * h], foot = [hip[0] + s * 0.15 * h, y - Math.max(0, -s) * 0.04 * h];
+      g.lineWidth = 0.055 * h; g.beginPath(); g.moveTo(hip[0], hip[1]); g.lineTo(knee[0], knee[1] - Math.max(0, s) * 0.02 * h); g.lineTo(foot[0], foot[1]); g.stroke();
+    }
+    // インバネスの胴と、ひるがえる短い肩掛け
+    const flap = Math.sin(rt * 6 + ph) * 0.025 * h;
+    g.beginPath(); g.moveTo(x + lean - 0.09 * h, y - 0.82 * h); g.lineTo(x + lean + 0.09 * h, y - 0.82 * h);
+    g.lineTo(x + 0.13 * h + flap * 0.5, y - 0.44 * h); g.lineTo(x - 0.15 * h - flap, y - 0.44 * h); g.closePath(); g.fill();
+    g.beginPath(); g.moveTo(x + lean - 0.1 * h, y - 0.8 * h); g.lineTo(x + lean + 0.1 * h, y - 0.8 * h);
+    g.quadraticCurveTo(x + lean + 0.2 * h + flap, y - 0.7 * h, x + lean + 0.16 * h + flap, y - 0.6 * h);
+    g.lineTo(x + lean - 0.2 * h - flap * 1.5, y - 0.6 * h); g.quadraticCurveTo(x + lean - 0.22 * h - flap, y - 0.7 * h, x + lean - 0.1 * h, y - 0.8 * h); g.closePath(); g.fill();
+    // 頭と中折れ帽
+    const hx = x + lean * 1.15, hy = y - 0.9 * h;
+    g.beginPath(); g.ellipse(hx, hy, 0.05 * h, 0.06 * h, 0, 0, Math.PI * 2); g.fill();
+    g.beginPath(); g.ellipse(hx, hy - 0.045 * h, 0.11 * h, 0.018 * h, -0.05, 0, Math.PI * 2); g.fill();
+    g.beginPath(); g.moveTo(hx - 0.06 * h, hy - 0.045 * h); g.quadraticCurveTo(hx - 0.06 * h, hy - 0.115 * h, hx, hy - 0.11 * h); g.quadraticCurveTo(hx + 0.065 * h, hy - 0.115 * h, hx + 0.06 * h, hy - 0.045 * h); g.closePath(); g.fill();
+    g.restore();
+  }
+
+  function render(g, S, t, rt) {
+    const Zc = Zat(t), camX = pc(Zc);
+    const HOR = H * (0.50 + 0.18 * ss(KL(5, 2).t, KL(5, 2).t + 3, t) * (1 - ss(KS(6) - 1.2, KS(6) + 0.8, t)) + 0.05 * ss(KS(6) + 1, KL(6, 1).t + 0.6, t));
+    const gold = ss(KS(8) + 0.8, KL(8, 2).t, t), rain = ss(KS(7) - 0.4, KS(7) + 0.9, t) * (1 - ss(KS(8) - 0.6, KS(8) + 0.8, t));
+    const drizzle = ss(KS(3) - 0.3, KS(3) + 0.8, t) * (1 - ss(KS(4) + 0.3, KS(4) + 1.6, t));
+    const fogC = mixc(mixc([216, 218, 214], [160, 166, 170], rain), [238, 224, 192], gold);
+    const fogStep = 0.15 + 0.07 * drizzle + 0.1 * rain - 0.07 * gold;
+    const open = ss(KS(6) + 0.3, KL(6, 1).t + 0.5, t);
+    g.setTransform(S, 0, 0, S, 0, 0); g.globalAlpha = 1; g.globalCompositeOperation = "source-over";
+
+    /* 空 */
+    const sky = g.createLinearGradient(0, 0, 0, HOR);
+    sky.addColorStop(0, rgba(mixc(mixc([200, 204, 206], [132, 140, 148], rain), [228, 214, 180], gold))); sky.addColorStop(1, rgba(fogC));
+    g.fillStyle = sky; g.fillRect(0, 0, W, HOR + 1);
+
+    /* 浅間山 */
+    const mA = 0.12 + 0.88 * open, px = 0.5 * W + (0 - camX) * 4, py = HOR - 0.17 * H;
+    const mg = g.createLinearGradient(0, py, 0, HOR); mg.addColorStop(0, rgba(mixc(fogC, [74, 82, 92], 0.7 * mA))); mg.addColorStop(1, rgba(mixc(fogC, [120, 128, 136], 0.25 * mA)));
+    g.fillStyle = mg; g.beginPath(); g.moveTo(px - 0.75 * W, HOR + 6); g.quadraticCurveTo(px - 0.25 * W, py + 0.05 * H, px - 0.05 * W, py + 4); g.lineTo(px + 0.06 * W, py + 4); g.quadraticCurveTo(px + 0.3 * W, py + 0.06 * H, px + 0.8 * W, HOR + 6); g.closePath(); g.fill();
+    g.strokeStyle = rgba(mixc(fogC, [40, 44, 50], 0.55 * mA)); g.lineWidth = 1.3; g.beginPath(); g.moveTo(px - 0.75 * W, HOR + 6); g.quadraticCurveTo(px - 0.25 * W, py + 0.05 * H, px - 0.05 * W, py + 4); g.lineTo(px + 0.06 * W, py + 4); g.quadraticCurveTo(px + 0.3 * W, py + 0.06 * H, px + 0.8 * W, HOR + 6); g.stroke();
+    g.lineWidth = 0.8; g.lineCap = "round";
+    for (const [x0, dx, len, a] of [[-0.04, -0.045, 0.07, 0.9], [-0.012, -0.01, 0.1, 0.84], [0.02, 0.022, 0.085, 0.9], [0.05, 0.07, 0.06, 0.8]]) {
+      g.strokeStyle = rgba(mixc(fogC, [40, 44, 50], a * mA)); g.beginPath(); g.moveTo(px + x0 * W, py + 6); g.quadraticCurveTo(px + (x0 + dx * 0.3) * W, py + len * 0.5 * H, px + (x0 + dx) * W, py + len * H); g.stroke();
+    }
+    const smokeK = ss(KL(6, 1).t - 0.5, KL(6, 1).t + 1.5, t) * (1 - 0.6 * rain);
+    if (smokeK > 0.01) {
+      const sc = mixc([58, 60, 64], [112, 92, 70], gold).join(",");
+      for (const p of smoke) {
+        const u = ((rt * 0.03 + p.i / smoke.length) % 1), lean = Math.pow(u, 1.7);
+        const x = px + 0.005 * W - lean * 0.36 * W + Math.sin(u * 7 + p.ph) * (4 + 16 * u), y = py + 6 - (u * 0.2 + Math.sqrt(u) * 0.1) * H, r = (7 + Math.pow(u, 0.8) * 62) * p.r;
+        const a = 0.8 * Math.pow(1 - u, 1.15) * ss(0, 0.05, u) * smokeK;
+        const sg = g.createRadialGradient(x, y, 0, x, y, r); sg.addColorStop(0, `rgba(${sc},${a})`); sg.addColorStop(0.55, `rgba(${sc},${a * 0.45})`); sg.addColorStop(1, `rgba(${sc},0)`);
+        g.fillStyle = sg; g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
+      }
+    }
+
+    /* 地面と小径：踏み固めた土、二本の轍、まん中の盛り上がり、小石、落ち葉、雨のあとの水たまり */
+    const dzEdge = ZEDGE - Zc, yEdge = dzEdge > 0.5 ? HOR + CAMH * F / dzEdge : H + 10, sag = Math.min(16, 0.1 * (yEdge - HOR));
+    const lip = () => { g.moveTo(0, yEdge + sag); g.quadraticCurveTo(W / 2, yEdge - sag, W, yEdge + sag); };   // 地面の端（丘の肩）
+    const vg0 = g.createLinearGradient(0, HOR, 0, yEdge + sag + 1); vg0.addColorStop(0, rgba(fogC)); vg0.addColorStop(0.45, rgba(mixc(fogC, [112, 122, 116], 0.3))); vg0.addColorStop(1, rgba(mixc(fogC, [255, 255, 255], 0.15)));
+    g.fillStyle = vg0; g.fillRect(0, HOR, W, Math.max(0, yEdge + sag + 1 - HOR));
+    const gg = g.createLinearGradient(0, Math.min(yEdge, H), 0, H); gg.addColorStop(0, rgba(mixc(fogC, [110, 104, 88], 0.6))); gg.addColorStop(1, rgba(mixc([76, 72, 58], [122, 92, 50], gold)));
+    const drawGround = () => { g.fillStyle = gg; g.beginPath(); lip(); g.lineTo(W, H); g.lineTo(0, H); g.closePath(); g.fill(); };
+    drawGround();
+    const P = (z, dx) => { const dz = z - Zc, s = F / dz; return [W / 2 + (pc(z) + dx - camX) * s, HOR + CAMH * s, s]; };
+    const strip = (o1, o2, col) => {
+      const pts = []; for (let dz = 0.45; dz < Math.min(80, dzEdge); dz *= 1.08) { const z = Zc + dz, a = P(z, o1(z)), b = P(z, o2(z)); pts.push([a[0], a[1], b[0]]); }
+      if (pts.length < 2) return; g.beginPath(); pts.forEach((p, i) => (i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1]))); for (let i = pts.length - 1; i >= 0; i--) g.lineTo(pts[i][2], pts[i][1]); g.closePath(); g.fillStyle = col; g.fill();
+    };
+    strip(z => -halfW(z) - 0.08, z => halfW(z) + 0.08, rgba(mixc([118, 108, 86], [176, 136, 72], gold), 0.55));
+    strip(z => -halfW(z), z => halfW(z), rgba(mixc([150, 136, 108], [198, 154, 86], gold)));
+    strip(z => -0.36, z => -0.2, rgba(mixc([108, 96, 74], [154, 112, 56], gold), 0.7));
+    strip(z => 0.18, z => 0.34, rgba(mixc([108, 96, 74], [154, 112, 56], gold), 0.7));
+    strip(z => -0.1, z => 0.1, rgba(mixc([170, 158, 128], [214, 172, 100], gold), 0.45));
+    if (rain > 0.05 || t > KS(8)) {
+      const wet = Math.max(rain, (1 - ss(KS(8) + 2, KS(8) + 9, t)) * (t > KS(8) ? 1 : 0));
+      for (const p of puddles) {
+        const dz = p.z - Zc; if (dz < 0.7 || dz > 25) continue; const [x, y, s] = P(p.z, p.dx), rx = p.w * s, ry = Math.max(1, Math.min(rx * 0.3, CAMH * F * p.l / (2 * dz * dz)));
+        g.save(); g.translate(x, y); g.scale(1, ry / rx); const pg = g.createRadialGradient(0, 0, rx * 0.3, 0, 0, rx); pg.addColorStop(0, rgba(mixc(fogC, [255, 255, 255], 0.2), 0.42 * wet)); pg.addColorStop(1, rgba(mixc(fogC, [255, 255, 255], 0.2), 0));
+        g.fillStyle = pg; g.beginPath(); g.arc(0, 0, rx, 0, Math.PI * 2); g.fill(); g.restore();
+      }
+    }
+    for (const st of stones) { const dz = st.z - Zc; if (dz < 0.5 || dz > 18) continue; const [x, y, s] = P(st.z, st.dx), r = st.r * s; g.fillStyle = "rgba(70,66,58,.55)"; g.beginPath(); g.ellipse(x, y, r, r * st.sh * 0.6, 0, 0, Math.PI * 2); g.fill(); g.fillStyle = "rgba(220,214,200,.35)"; g.beginPath(); g.ellipse(x - r * 0.25, y - r * 0.2, r * 0.45, r * 0.22, 0, 0, Math.PI * 2); g.fill(); }
+    g.strokeStyle = rgba(mixc([84, 72, 54], [190, 132, 48], gold), 0.7); g.lineWidth = 1;
+    for (const l of litter) { const dz = l.z - Zc; if (dz < 0.5 || dz > 22) continue; const [x, y, s] = P(l.z, l.dx), len = l.l * s; g.beginPath(); g.moveTo(x - Math.cos(l.a) * len, y - Math.sin(l.a) * len * 0.3); g.lineTo(x + Math.cos(l.a) * len, y + Math.sin(l.a) * len * 0.3); g.stroke(); }
+
+    /* 林：遠い層から描き、層ごとに霧を一枚かける（墨の遠近） */
+    const windK = 0.4 + 1.2 * ss(KL(3, 3).t - 0.5, KL(3, 3).t + 0.8, t) * (1 - ss(KS(4), KS(4) + 1.5, t)) + 0.8 * ss(KL(5, 3).t - 0.8, KL(5, 3).t + 0.5, t) * (1 - ss(KS(6) - 0.5, KS(6) + 0.8, t)) + 1.6 * ss(KL(8, 3).t - 0.8, KL(8, 3).t + 0.8, t);
+    const fogBand = d => {
+      const yd = HOR + CAMH * F / d, fb = g.createLinearGradient(0, yd - 30, 0, yd + 14);
+      fb.addColorStop(0, rgba(fogC, fogStep)); fb.addColorStop(1, rgba(fogC, 0));
+      g.fillStyle = rgba(fogC, fogStep); g.fillRect(0, 0, W, Math.max(0, yd - 30)); g.fillStyle = fb; g.fillRect(0, yd - 30, W, 44);
+    };
+    const drawTwo = (pair, x, y, w, h) => { if (gold < 0.99) { g.globalAlpha = 1 - gold; g.drawImage(pair.g, x, y, w, h); } if (gold > 0.01) { g.globalAlpha = gold; g.drawImage(pair.y, x, y, w, h); } g.globalAlpha = 1; };
+    // 先を急ぐ人：霧の層の中に置く
+    const walkA = ss(KS(4) - 0.1, KS(4) + 1.2, t) * (1 - ss(KS(5) - 1.6, KS(5) - 0.1, t));
+    const walkZ = Zc + lerp(4.5, 28, ss(KS(4), KS(5), t));
+    let walkerDrawn = walkA < 0.01;
+    const drawWalker = () => {
+      walkerDrawn = true;
+      const [x, y, s] = P(walkZ, -0.08), h = 1.62 * s, dz = walkZ - Zc;
+      walkerFig(g, x, y, h, rt * 8.5, rgba(mixc([34, 34, 32], fogC, 1 - Math.exp(-dz / 40))), walkA, rt);
+    };
+    // 谷の霞：斜面の木の足もとは霞にとけ、地面の端もやわらぐ（斜面の木を描いたあと、手前の物の前に）
+    let lipDone = false;
+    const lipMist = () => {
+      lipDone = true;
+      const hgt = Math.min(110, 0.9 * (yEdge - HOR) + 20);
+      g.save(); g.beginPath(); lip(); g.lineTo(W, 0); g.lineTo(0, 0); g.closePath(); g.clip();
+      const m = g.createLinearGradient(0, yEdge + sag, 0, yEdge - hgt); m.addColorStop(0, rgba(fogC, 0.9)); m.addColorStop(0.45, rgba(fogC, 0.45)); m.addColorStop(1, rgba(fogC, 0));
+      g.fillStyle = m; g.fillRect(0, yEdge - hgt, W, hgt + sag + 2); g.restore();
+      const m2 = g.createLinearGradient(0, yEdge - sag, 0, yEdge + 90); m2.addColorStop(0, rgba(fogC, 0.88)); m2.addColorStop(0.35, rgba(fogC, 0.5)); m2.addColorStop(1, rgba(fogC, 0));
+      g.fillStyle = m2; g.fillRect(0, yEdge - sag, W, 90 + sag);
+    };
+    let bi = 0;
+    for (const o of objs) {
+      if (!lipDone && o.z < ZEDGE) lipMist();
+      const dz = o.z - Zc; if (dz < 0.35 || dz > 95) continue;
+      while (bi < BANDS.length && dz < BANDS[bi]) { fogBand(BANDS[bi]); bi++; }
+      if (!walkerDrawn && o.z < walkZ) drawWalker();
+      const s = F / dz, sx = W / 2 + (o.x - camX) * s; if (sx < -400 || sx > W + 400) continue;
+      const base = HOR + (CAMH - (o.elev || 0)) * s;
+      if (o.kind === "grass") {
+        const w = 1.0 * o.s * s, h = 0.5 * o.s * s; if (w < 2) continue;
+        g.save(); g.translate(sx, base); if (o.flip) g.scale(-1, 1); drawTwo(GR[o.sp], -w / 2, -h, w, h); g.restore();
+        continue;
+      }
+      if (dz > 11 || o.below) {
+        const hpx = o.h * s * 880 / 860, wpx = hpx * 300 / 880;
+        if (o.below) { g.save(); g.beginPath(); lip(); g.lineTo(W, 0); g.lineTo(0, 0); g.closePath(); g.clip(); drawTwo(TS[o.sp], sx - wpx / 2, base - hpx, wpx, hpx); g.restore(); }
+        else drawTwo(TS[o.sp], sx - wpx / 2, base - hpx, wpx, hpx);
+        continue;
+      }
+      const top = base - o.h * s, tw = Math.max(1, o.w * s), lean = o.lean * o.h * s;
+      const tg = g.createLinearGradient(sx - tw / 2, 0, sx + tw / 2, 0);
+      tg.addColorStop(0, `rgba(${INK},0.95)`); tg.addColorStop(0.55, rgba(mixc([96, 88, 76], [128, 104, 72], gold))); tg.addColorStop(1, `rgba(${INK},0.9)`);
+      const sh = g.createRadialGradient(0, 0, 0, 0, 0, 1); sh.addColorStop(0, `rgba(${INK},0.42)`); sh.addColorStop(1, `rgba(${INK},0)`);
+      g.save(); g.translate(sx + tw * 0.3, base + tw * 0.04); g.scale(tw * 2.1, tw * 0.42); g.fillStyle = sh; g.beginPath(); g.arc(0, 0, 1, 0, Math.PI * 2); g.fill(); g.restore();
+      g.fillStyle = tg; g.beginPath(); g.moveTo(sx - tw * 0.92, base); g.quadraticCurveTo(sx - tw * 0.54, base - 0.1 * s, sx - tw / 2, base - 0.55 * s); g.lineTo(sx - tw * 0.12 + lean, top); g.lineTo(sx + tw * 0.12 + lean, top); g.lineTo(sx + tw / 2, base - 0.55 * s); g.quadraticCurveTo(sx + tw * 0.54, base - 0.1 * s, sx + tw * 0.92, base); g.quadraticCurveTo(sx, base + tw * 0.3, sx - tw * 0.92, base); g.closePath(); g.fill();
+      g.strokeStyle = `rgba(${INK},0.35)`; g.lineWidth = Math.max(0.6, tw * 0.06);
+      for (let k = 0; k < 5; k++) { const fx = sx - tw * 0.3 + k * tw * 0.15; g.beginPath(); g.moveTo(fx, base); g.lineTo(fx + lean * 0.3, Math.max(top, base - o.h * s * 0.6)); g.stroke(); }
+      if (rain > 0.05) { g.fillStyle = `rgba(230,236,240,${0.28 * rain})`; g.fillRect(sx - tw * 0.3, top, Math.max(0.6, tw * 0.08), base - top); }
+      for (let hm = o.h * 0.3, i = 0; hm < o.h * 0.995; hm += 0.5, i++) {
+        const y = base - hm * s; if (y < -60) break; if (y > H + 40) continue;
+        const u = (hm - o.h * 0.3) / (o.h * 0.7), L = (2.4 * Math.pow(1 - u, 0.85) + 0.25) * s, sway = Math.sin(rt * 1.3 + o.ph + i * 0.6) * 0.05 * windK;
+        for (const side of [-1, 1]) {
+          g.save(); g.translate(sx + lean * hm / o.h, y); g.scale(side, 1); g.rotate(sway * side + ((i * 7 + (side > 0 ? 3 : 0)) % 5 - 2) * 0.03);
+          drawTwo(BR[(o.sp + i + (side > 0 ? 1 : 0)) & 3], 0, -L * 0.375 * 44 / 128, L, L * 0.375); g.restore();
+        }
+        if (i % 3 === 1) { const Lf = L * 0.5; g.save(); g.translate(sx + lean * hm / o.h, y + 2); g.scale(i % 2 ? 1 : -1, 1); drawTwo(BR[(o.sp + i + 2) & 3], 0, -Lf * 0.375 * 44 / 128, Lf, Lf * 0.375); g.restore(); }
+      }
+    }
+    if (!lipDone) lipMist();
+    while (bi < BANDS.length) { fogBand(BANDS[bi]); bi++; }
+    if (!walkerDrawn) drawWalker();
+
+    /* 文字の置き場の霧 */
+    const mist = g.createRadialGradient(0.80 * W, 0.30 * H, 10, 0.80 * W, 0.30 * H, 0.55 * W);
+    mist.addColorStop(0, rgba(fogC, 0.6)); mist.addColorStop(0.6, rgba(fogC, 0.28)); mist.addColorStop(1, rgba(fogC, 0));
+    g.fillStyle = mist; g.fillRect(0, 0, W, H);
+
+    /* 霧の中の光の筋は描かない：縁のまっすぐな帯が影に見えた。光は八連で初めてさす */
+
+    /* 霧雨と雨 */
+    const pr = Math.max(drizzle * 0.6, rain);
+    if (pr > 0.01) {
+      g.strokeStyle = `rgba(232,238,242,${0.18 + 0.22 * rain})`; g.lineWidth = 0.8 + 0.6 * rain;
+      for (const s of streaks) {
+        const len = (8 + 18 * rain) * s.l, y = (s.y + rt * (500 + 700 * rain) * s.sp) % (H + 40) - 20, x = (s.x - rt * 30) % W;
+        g.globalAlpha = pr; g.beginPath(); g.moveTo((x + W) % W, y); g.lineTo((x + W) % W - len * 0.18, y + len); g.stroke();
+      }
+      g.globalAlpha = 1;
+    }
+
+    /* 八連：光と、風に舞う金の細い葉 */
+    if (gold > 0.01) {
+      g.globalCompositeOperation = "lighter";
+      for (let i = 0; i < 4; i++) {
+        const bw = 120 + i * 22, x0 = W * (0.56 + i * 0.15) + Math.sin(rt * 0.2 + i) * 10;
+        g.save(); g.globalAlpha = 0.11 * gold * (0.75 + 0.25 * Math.sin(rt * 0.3 + i * 1.7));
+        g.transform(bw / 64, 0, -0.5 * W / 256, H / 256, x0 - bw / 2, 0); g.drawImage(beamSpr, 0, 0); g.restore();
+      }
+      g.globalCompositeOperation = "source-over";
+      const fall = ss(KL(8, 2).t, KL(8, 3).t + 1, t) * (1 - ss(KARA_END + 4, KARA_END + 8, t)), gust = 1 + 1.8 * ss(KL(8, 3).t - 0.5, KL(8, 3).t + 1.5, t) * (1 - ss(KARA_END, KARA_END + 3, t));
+      if (fall > 0.01) {
+        g.strokeStyle = `rgba(222,168,60,${0.85 * fall})`; g.lineWidth = 1.2;
+        for (const nd of needles) {
+          const x = ((nd.x + rt * nd.vx * gust) % (W + 40) + W + 40) % (W + 40) - 20, y = ((nd.y + rt * nd.vy) % (H + 40) + H + 40) % (H + 40) - 20, a = rt * 2 + nd.ph;
+          g.beginPath(); g.moveTo(x, y); g.lineTo(x + Math.cos(a) * nd.l, y + Math.sin(a) * nd.l); g.stroke();
+        }
+      }
+    }
+
+    const vg = g.createRadialGradient(W / 2, H * 0.46, H * 0.32, W / 2, H * 0.46, H * 0.9);
+    vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, `rgba(20,22,24,${0.3 + 0.2 * rain})`);
+    g.fillStyle = vg; g.fillRect(0, 0, W, H);
+    const end = ss(KARA_END + 4.4, KARA_END + 7.6, t); if (end > 0) { g.fillStyle = `rgba(10,10,12,${end * 0.92})`; g.fillRect(0, 0, W, H); }
+  }
+  return { render };
+})();
+
+/* ===================== 楽譜：落葉松 ===================== */
+// 音楽は行と間に沿う。言葉のあいだだけ弦を鳴らし、改行の間には新しい音を入れず、余韻だけを残す
+const KARA_GAIN = 1.7;   // 全体の大きさ。ほかの演目（竹は −20 LUFS）にそろえる
+const KaramatsuScore = {
+  master: [[0, KARA_GAIN], [KARA_END + 5.5, KARA_GAIN], [KARA_END + 10.5, 0.0001]],
+  setup(E) {
+    E.makeBus("m", { send: 0.42 });
+    E.makeBus("air", { send: 0.25 });
+    E.makeBus("far", { send: 0.8, lp: [[0, 3200]] });
+  },
+  sustain(E, off) {
+    const T0 = E.T0, at = t => T0 + Math.max(0, t - off), b = E.bus, END = KARA_END + 10;
+    if (off < END) E.ambience(T0, [[0, 0], [2, 1], [KARA_END + 6, 1], [END, 0]], b.air, 420, 0.2, 0.09);
+    const z1 = KS(3) - 0.3, z2 = KS(4) + 1.6;
+    if (off < z2) E.hiss(at(z1), [[z1, 0], [z1 + 1.1, 1], [z2 - 1.3, 1], [z2, 0]], b.air, 6200, 0.03, 0.2);
+    const w1 = KL(5, 1).t, w2 = KS(6);
+    if (off < w2) E.hiss(at(w1), [[w1, 0], [w1 + 1.5, 1], [w2 - 1.5, 1], [w2, 0]], b.air, 3000, 0.035, 0.5);
+    const r1 = KS(7) - 0.4, r2 = KS(8) + 0.8;
+    if (off < r2) E.hiss(at(r1), [[r1, 0], [r1 + 1.3, 1], [r2 - 1.4, 1], [r2, 0]], b.air, 5200, 0.09, 0.15);
+    const s1 = KS(8) - 0.2;
+    if (off < END) { E.ambience(at(s1), [[s1, 0], [s1 + 2.5, 1], [KARA_END + 6, 1], [END, 0]], b.air, 900, 0.3, 0.7); E.hiss(at(s1), [[s1, 0], [s1 + 2.5, 1], [KARA_END + 6, 1], [END, 0]], b.air, 1800, 0.02, 0.65); }
+    // 林のはずれ：浅間山を前にした、ひろい弦
+    if (off < KS(7)) E.strings(at(KS(6)), T0 + (KS(7) - off), [38, 45, 50, 57, 64], off > KS(6) ? 0.6 : 2.4, b.m, 0.55, 2.5);
+  },
+  build(E) {
+    const ev = [], add = (t, f) => ev.push({ t, f }), b = E.bus;
+    const Dm = [50, 57, 62, 65], Bb = [46, 53, 58, 62], Gm = [43, 50, 55, 58], A = [45, 52, 57, 61], F = [41, 48, 53, 57], C = [48, 55, 60, 64];
+    const D = [50, 57, 62, 66], G = [43, 50, 55, 59], Bm = [47, 54, 59, 62], Dm9 = [50, 57, 64, 65];
+    const prog = { 1: [Dm, Bb, Gm, A], 2: [Dm, F, Gm, A], 3: [Dm, Bb, C, A], 4: [Dm, F, Gm, A], 5: [Dm, Bb, Gm, A], 6: [Dm9, Dm9, Dm9, Bb], 7: [Dm, Bb, Gm, A], 8: [D, G, Bm, D] };
+    add(0.8, w => E.strum(w, [50, 57, 62, 65], 0.45, b.m, true));
+    KARA_T.lines.forEach(ln => {
+      const k = ln.g + 1, j = ln.j, ch = prog[k][j], speak = ln.end - ln.t, hold = ln.next - ln.t;
+      const quiet = k === 5 && j >= 1 ? 0.35 : k === 7 ? 0.4 : k === 6 ? 0.6 : 1;
+      // 行の頭：低い弦
+      add(ln.t, w => E.pluck(w, ch[0] - 12, 0.55 * quiet, b.m, 1.2, true, 0));
+      // 言葉の長さだけ分散和音。最後の一音が改行の間に響き残る
+      const notes = [ch[1], ch[2], ch[3], ch[2] + 12, ch[3], ch[2]], n = k === 7 ? 2 : (k === 5 && j >= 1) || k === 6 ? 3 : 6;
+      for (let q = 0; q < n; q++) { const tq = ln.t + q * speak / n, last = q === n - 1; add(tq, w => E.pluck(w, notes[q], 0.27 * quiet, b.m, last ? 1.5 : 0.7, true, [-0.6, 0.45, -0.25, 0.65, -0.45, 0.2][q])); }
+      // 弦の和音：一連の初めの二行は竪琴だけ。雨の連は休む
+      if (!(k === 1 && j < 2) && k !== 7 && k !== 6) add(ln.t, w => E.strings(w, w + hold, ch.slice(1), 0.45, b.m, 0.45 * quiet, 1.8));
+      // チェロ：二人目の歩み（四連）と、八連の肯定に
+      if ([2, 4, 8].includes(k)) add(ln.t, w => E.cello(w, ch[0], hold + 0.2, 0.8, b.m, -0.15));
+      // 笛は五音と七音の句に沿って：五音でひと息、七音で下りる（八連は上がる）
+      if (j === 0 && [1, 3, 8].includes(k)) {
+        const p2 = ln.ph2, m2 = k === 8 ? 78 : 77, m3 = k === 8 ? 81 : 74;
+        add(ln.t, w => E.fue(w, 74, Math.max(0.3, p2 - ln.t - 0.06), 0.48, b.m));
+        add(p2, w => E.fue(w, m2, (ln.end - p2) * 0.5, 0.48, b.m));
+        add(p2 + (ln.end - p2) * 0.5, w => E.fue(w, m3, (ln.end - p2) * 0.5 + 0.5, 0.42, b.m));
+      }
+    });
+    // 三連：山風
+    add(KL(3, 3).t - 0.2, w => E.gust(w, 3.2, 0.8, b.air));
+    // 四連：先を急ぐ足音が遠ざかる
+    for (let tt = KS(4) + 0.2, i = 0; tt < KS(5) - 1.5; tt += 0.42, i++) { const v = 0.9 * (1 - (tt - KS(4)) / (KS(5) - KS(4))); add(tt, w => E.thud(w, v, b.far)); }
+    // 六連：浅間嶺の二行は同じ笛の句をくり返し、二度目は遠く
+    [[KL(6, 1), 0.5], [KL(6, 2), 0.32]].forEach(([ln, v]) => { add(ln.t, w => E.fue(w, 69, ln.ph2 - ln.t, v, b.m)); add(ln.ph2, w => E.fue(w, 74, ln.end - ln.ph2 + 0.8, v, b.m)); });
+    add(KS(6), w => E.strum(w, [38, 45, 50, 57, 64], 0.6, b.m, true));
+    // 七連：雨のしずくと、かんこ鳥
+    const Rr = mulberry(9); for (let i = 0; i < 70; i++) { const t = KS(7) + Rr() * (KS(8) - KS(7)), v = 0.3 + Rr() * 0.6; add(t, w => E.drop(w, v, b.air)); }
+    add(KL(7, 2).end + 0.25, w => E.cuckoo(w, 0.9, b.far)); add(KL(7, 3).t + 0.6, w => E.cuckoo(w, 0.6, b.far)); add(KL(7, 3).end + 0.4, w => E.cuckoo(w, 0.4, b.far));
+    // 八連：からまつにからまつのかぜ
+    add(KL(8, 3).t - 0.4, w => E.gust(w, 4.2, 1, b.air));
+    add(KL(8, 3).end + 0.3, w => E.strum(w, [50, 57, 62, 66, 69, 74], 0.7, b.m, true));
+    add(KL(8, 3).end + 0.3, w => E.strings(w, w + 6, [62, 66, 69, 74], 1.2, b.m, 0.5, 3));
+    add(KL(8, 3).end + 1.2, w => E.crystal(w, 86, 0.4, b.m));
+    return ev;
+  }
+};
+
+/* ===================== 演目：落葉松 ===================== */
+{
+  const L = (k, j) => +KL(k, j).t.toFixed(2), S = k => KS(k);
+  const lines = KARA_T.lines.map(l => ({ t: +l.t.toFixed(2), g: l.g, html: l.html, gap: l.j === 0 && l.g > 0, alt: l.g === 7, units: l.units, times: l.times }));
+  POEMS.karamatsu = {
+    id: "karamatsu", title: "落葉松", titleHTML: "<ruby>落葉松<rt>からまつ</rt></ruby>", titleInk: true, author: "北原白秋", year: "1921", dur: KARA_DUR, fs: 33, reveal: "mora",
+    turn: { t: +S(8).toFixed(2), label: "金色の林へ" },
+    meta: `北原白秋　初出『明星』1921年11月号　詩集『水墨集』（1923）所収　上演 ${Math.floor(KARA_DUR / 60)}:${String(Math.round(KARA_DUR % 60)).padStart(2, "0")}`,
+    aria: "落葉松の映像。霧の落葉松林を歩き、浅間山の煙を見て、雨のあと金色の林へ",
+    lines,
+    groups: KARA_TEXT.map((_, i) => ({ out: i < 7 ? [+(S(i + 2) - 0.9).toFixed(2), +(S(i + 2) - 0.25).toFixed(2)] : [+(KARA_END + 4).toFixed(2), +(KARA_END + 5.2).toFixed(2)], tone: "ink" })),
+    groupPos: { top: "6%", right: "6%" },
+    titleFade: [3.0, 3.8], credit: [+(KARA_END + 6.4).toFixed(2), +(KARA_END + 7.6).toFixed(2)],
+    creditHTML: "北原白秋「落葉松」<small>詩集『水墨集』（1923）所収<br>映像と音楽は、この詩のためにコードで作りました</small>",
+    cues: [
+      ["文字", "声に出して読む速さ（一音およそ 0.14 秒）で、一字ずつ墨がにじむように現れます。五音と七音のあいだに小さな間。「。」の行のあとは長く、「、」の行は短く、句読点のない行は次の行へすぐ流れます。改行の間が、そのまま時間になります。五連で理由もなく歩みをひそめるところから、一行ごとに少しずつゆっくりになり、最後の行は一音およそ 0.19 秒で読み終えます。"],
+      ["映像", "詩集の名にならって、水墨画のような墨の濃淡で描きます。霧の落葉松林の小径を、歩く速さで奥へ進みます。林を出たり入ったり、霧雨、先を急ぐインバネスの人影、林のはずれの浅間山の煙。"],
+      ["音楽", "言葉の長さのあいだだけ竪琴の分散和音を鳴らし、改行の間には新しい音を入れず、余韻だけを残します。笛は五音の句と七音の句に合わせて息を継ぎます。七連の雨では音楽がほとんど止み、遠くでかんこ鳥が鳴きます。"],
+      ["転換", "白秋が歩いたのは夏の終わり、かんこ鳥が鳴く季節です。最後の連で、林は詩が発表された十一月の金色に変わり、音楽も短調から長調に変わります。11 月 2 日は白秋の命日（白秋忌）です。"]
+    ],
+    reading: [
+      { t: L(1, 0), q: "一　からまつの林を過ぎて、……たびゆくはさびしかりけり。", read: "「けり」は、いま初めて気づいた感動です。さびしさに気づくのは、歩いている自分自身です。", sound: "どの行も「からまつの／林を過ぎて」と五音・七音の十二音。「からまつ」は a・a・a・u と口を大きく開く明るい音、「さびしかりけり」は i が続く細い音です。開いては細る響きが、さびしさを運びます。「しみじみ」の畳語は足音のようです。", stage: "霧の落葉松林の小径を、歩く速さで奥へ進みます。" },
+      { t: L(2, 0), q: "二　からまつの林を出でて、からまつの林に入りぬ。からまつの林に入りて、", read: "出ては入り、入っては続く。景色はほとんど変わらないのに、道だけが細く続いていきます。単調さそのものが、旅の時間です。", sound: "「出でて／入りぬ／入りて」と、同じ形の行が三つ並びます。言葉も林を出たり入ったりして、音でも同じ所をめぐります。", stage: "林がとぎれて小さな空き地に出て、また林に入ります。小径が細くなります。" },
+      { t: L(3, 0), q: "三　からまつの林の奥も／わが通る道はありけり。霧雨のかかる道なり。山風のかよふ道なり。", read: "わたしの通る道は、霧雨と山風も通う道です。ひとりの道に、自然が寄り添います。", sound: "一行目「奥も」には句読点がなく、次の行へそのまま流れます（ここでは間を短くしています）。後半は「〜道なり。」が二行続き、行末の同じ音が足取りになります。", stage: "霧雨が降り、山風が林を渡って、梢が揺れます。" },
+      { t: L(4, 1), q: "四　われのみか、ひともかよひぬ。ほそぼそと通ふ道なり。さびさびといそぐ道なり。", read: "自分だけの道と思ったら、ほかの人も通っている。孤独が少しだけ他人へ開かれます。けれどその人も、さびしげに急いでいきます。", sound: "「ほそぼそ」「さびさび」の畳語と、「〜道なり。」がさらに二行。三連から四連へ「道なり」が四度鳴ります。", stage: "インバネスに中折れ帽の人影が、裾をひるがえして霧の奥へ急ぎます。足音も遠のきます。" },
+      { t: L(5, 1), q: "五　ゆゑしらず歩みひそめつ。……からまつとささやきにけり。", read: "理由もなく足音をひそめ、落葉松と小声で話します。人と木の境が溶ける所です。", sound: "一連と同じ「からまつの林を過ぎて」に戻ります。「ささやき」は s の音が続く息の多い言葉で、声も自然に小さくなります。", stage: "歩みがゆっくり止まり、梢を見上げます。音楽も息をひそめます。" },
+      { t: L(6, 1), q: "六　浅間嶺にけぶり立つ見つ。（二度）からまつのまたそのうへに。", read: "林を出ると、浅間山の噴煙が見えます。煙は、落葉松の梢のさらに上に立ちます。", sound: "同じ行を二度くり返します。声に出すと、二度目は一度目より遠く聞こえ、立ち止まって見入る時間になります。", stage: "林のはずれから、斜面の梢の上に浅間山と立ちのぼる煙。笛は同じ句を二度、二度目は遠く。" },
+      { t: L(7, 1), q: "七　さびしけどいよよしづけし。かんこ鳥鳴けるのみなる。", read: "雨の林はさびしいけれど、いっそう静かです。聞こえるのは、かんこ鳥（カッコウ）の声と、濡れる音だけ。ひとつの音で、静けさを際立たせています。", sound: "「しづけし」「のみなる」と、音の数の少ない言葉で静けさを作ります。「〜のみなる。」が二行並び、雨だれのように落ちます。", stage: "雨。音楽はほとんど止み、遠くでかんこ鳥が鳴きます。" },
+      { t: L(8, 0), q: "八　世の中よ、あはれなりけり。常なけどうれしかりけり。山川に山がはの音、からまつにからまつのかぜ。", read: "ここで初めて、目が林から世の中へ開きます。無常だけれど、それがうれしい。山川には山川の音、からまつにはからまつの風。それぞれがそれぞれのままであることを肯定して終わります。", sound: "「山川に山がはの音」「からまつにからまつのかぜ」と、「A に A の B」の同じ言葉のくり返し。言葉が自分自身を響かせて終わります。最後の一語は「かぜ」です。", stage: "雨が上がって光がさし、林が十一月の金色に変わります。風に細い葉が舞い、音楽は短調から長調へ。" }
+    ],
+    rights: "作者は 1942 年に亡くなり、作品は日本でも米国でも著作権の保護期間が終わっています。本文は詩集『水墨集』（1923）所収の形を、複数の資料で照らし合わせました。",
+    scene: KaramatsuScene, score: KaramatsuScore
+  };
+}
+
 /* ===================== 演目のデータ ===================== */
-const PROGRAMS = [{ id: "take" }, { soon: true, title: "落葉松", author: "北原白秋", year: "1921" }];
+const PROGRAMS = [{ id: "take" }, { id: "karamatsu" }, { soon: true, title: "大漁", author: "金子みすゞ", year: "1924" }];
 
 /* ===================== 上演の進行 ===================== */
 const $ = id => document.getElementById(id);
@@ -1457,7 +1942,7 @@ function load(id) {
   });
   lineEls = P.lines.map(l => {
     const s = document.createElement("span"); s.className = "line";
-    if (P.reveal === "mora" && l.units) { s.innerHTML = l.units.map(u => `<span class="ch">${u.html}</span>`).join(""); s._chs = [...s.querySelectorAll(".ch")]; s._times = l.times; s._chs.forEach(c => { c._p = -1; }); }
+    if (P.reveal === "mora" && l.units) { s.innerHTML = l.units.map(u => `<span class="ch">${u.html}</span>`).join(""); s._chs = [...s.querySelectorAll(".ch")]; s._times = l.times; s._chs.forEach(c => { c._p = -1; c._rt = c.querySelector("rt"); }); }
     else s.innerHTML = l.html;
     if (l.ind) s.style.paddingInlineStart = `${l.ind * 1.14}em`; groupEls[l.g].appendChild(s); return s;
   });
@@ -1563,6 +2048,7 @@ function updateVerse(t) {
         const ct = el._times[c], p2 = ss(ct, ct + 0.32, t), sp = el._chs[c];
         if (sp._p === p2) continue;
         sp._p = p2; sp.style.opacity = p2.toFixed(2);
+        if (sp._rt) sp._rt.style.opacity = p2.toFixed(2);   // ふりがなは親の透明度を受け継がないことがある（Chrome）。字と一緒に出す
         sp.style.filter = p2 > 0 && p2 < 1 ? `blur(calc(var(--u) * ${(3 * (1 - p2)).toFixed(2)}))` : "none";
       }
     } else {
@@ -1594,7 +2080,7 @@ function frame() {
 }
 
 resize();
-load(POEMS[location.hash.slice(1)] ? location.hash.slice(1) : "take");
+load(POEMS[location.hash.slice(1)] ? location.hash.slice(1) : "karamatsu");
 requestAnimationFrame(frame);
 
 // 確かめ用：指定の秒の絵を出す（音は鳴らさない）
