@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>詩景 ― 北原白秋「落葉松」</title>
-<meta name="description" content="詩に、景色と音を。一編ずつ、その詩のための映像と音楽をコードで仕立てて上演します。第2回は北原白秋「落葉松」。霧の落葉松林を歩く八連を、水墨の濃淡と、字の現れる速さで。">
+<title>詩景 ― 金子みすゞ「大漁」</title>
+<meta name="description" content="詩に、景色と音を。一編ずつ、その詩のための映像と音楽をコードで仕立てて上演します。第3回は金子みすゞ「大漁」。朝焼けの浜の祭りから、海の中の鰮の群れへ。字の現れる速さで。">
 <meta property="og:type" content="website">
-<meta property="og:title" content="詩景 ― 北原白秋「落葉松」">
-<meta property="og:description" content="詩に、景色と音を。一編ずつ、その詩のための映像と音楽をコードで仕立てて上演します。第2回は北原白秋「落葉松」。霧の落葉松林を歩く八連を、水墨の濃淡と、字の現れる速さで。">
+<meta property="og:title" content="詩景 ― 金子みすゞ「大漁」">
+<meta property="og:description" content="詩に、景色と音を。一編ずつ、その詩のための映像と音楽をコードで仕立てて上演します。第3回は金子みすゞ「大漁」。朝焼けの浜の祭りから、海の中の鰮の群れへ。字の現れる速さで。">
 <meta name="twitter:card" content="summary_large_image">
 <meta property="og:url" content="https://shikei-jp.github.io/">
-<meta property="og:image" content="https://shikei-jp.github.io/og_karamatsu.png">
+<meta property="og:image" content="https://shikei-jp.github.io/og_tairyo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@500;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
@@ -213,15 +213,16 @@ function mulberry(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Ma
 const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /* ===================== 大漁：本文と、声に出す時間 ===================== */
+// 本文は旧かなづかい（初出『童話』1924 年 3 月号の形。旧字体だけ新字体に改めた。竹・落葉松と同じ扱い）。「祭り」の行は初出誌の画像で未確認（全集は「祭りの」）。
 // 二連・十行（四行＋六行）。画面の文字は三つの場面に分ける：浜の歓声／「けど」の転換／海の中。
-// どの二行も「七音（初めと終わりは八音）＋五音」で一つの句になる。二連は「するだろう。」まで一続きの文。
+// どの二行も「七音（初めと終わりは八音）＋五音」で一つの句になる。二連は「するだらう。」まで一続きの文。
 const TAIRYO_TEXT = [
-  ["朝焼小焼だ", "大漁だ", "<ruby>大羽<rt>おおば</rt></ruby><ruby>鰮<rt>いわし</rt></ruby>の", "大漁だ。"],
-  ["浜は祭りの", "ようだけど"],
-  ["海のなかでは", "何万の", "<ruby>鰮<rt>いわし</rt></ruby>のとむらい", "するだろう。"]
+  ["朝焼小焼だ", "大漁だ", "<ruby>大羽<rt>おほば</rt></ruby><ruby>鰮<rt>いわし</rt></ruby>の", "大漁だ。"],
+  ["浜は祭りの", "やうだけど"],
+  ["海のなかでは", "何万の", "<ruby>鰮<rt>いわし</rt></ruby>のとむらひ", "するだらう。"]
 ];
 const TAIRYO_KANJI = { "朝": 2, "焼": 2, "小": 1, "大": 2, "漁": 2, "浜": 2, "祭": 2, "海": 2, "何": 2, "万": 2 };
-// 祭りの拍（104 拍/分）。太鼓と篠笛は 4.0 秒から。笛の旋律 [音, 拍] は、「ようだけど」を置く時刻も決める
+// 祭りの拍（104 拍/分）。太鼓と篠笛は 4.0 秒から。笛の旋律 [音, 拍] は、「やうだけど」を置く時刻も決める
 const TAIRYO_B = 60 / 104, TAIRYO_S0 = 4.0;
 const TAIRYO_MEL = [
   [81, 1], [83, .5], [81, .5], [79, 1], [76, 1], [74, 1.5], [76, .5], [79, 2],   // 一連の掛け声の下で
@@ -270,9 +271,9 @@ const TAIRYO_T = (() => {
   U[2].forEach((us, j) => { const l = lay(2, j, t, TAIRYO_SLOW[j], j === U[2].length - 1 ? 1.3 : 1); lines.push(l); t = l.end + (TAIRYO_REST[j] || 0); });
   const end = lines[lines.length - 1].end, rin = lines[8].times[at(lines[8].units, "と")], out = end + 7.0;
   lines.forEach((l, i) => { l.next = i + 1 < lines.length ? lines[i + 1].t : end; });
-  // da：「だ」の字の時刻　bend：笛が半音下がる（「け」）　dive：水にもぐる　rin：「とむらい」の「と」でりん　end：「するだろう。」の「。」
+  // da：「だ」の字の時刻　bend：笛が半音下がる（「け」）　dive：水にもぐる　rin：「とむらひ」の「と」でりん　end：「するだらう。」の「。」
   // rin2：余韻の二つ目のりん　out：文字が消え始める　dur：上演の長さ
-  return { lines, da: lines.filter(l => l.da !== null).map(l => l.da), ln, bend, dive, rin, end, rin2: end + 4.4, out, dur: +(out + 5.4).toFixed(2) };
+  return { lines, da: lines.filter(l => l.da !== null).map(l => l.da), ln, bend, dive, rin, end, rin2: end + 4.4, out, dur: +(out + 6.6).toFixed(2) };
 })();
 const TAIRYO_L = (k, j) => TAIRYO_T.lines[[0, 4, 6][k - 1] + j];   // k：場面（1〜3）、j：その中の行（0 から）
 
@@ -313,6 +314,15 @@ const TairyoScene = (() => {
   });
   const snow = Array.from({ length: 170 }, () => ({ x: rnd(0, W), y: rnd(0, H), sp: rnd(6, 16), ph: rnd(0, 6.28), r: rnd(0.7, 1.8) }));
   const rays = Array.from({ length: 6 }, (_, i) => ({ x: (i + 0.5) / 6 * W + rnd(-30, 30), w: rnd(26, 70), sk: rnd(-60, 60), ph: rnd(0, 6.28) }));
+  // 光の筋の下絵：横は縁がとけ、下へ消える（縁のまっすぐな帯にすると影に見える。落葉松と同じ決まり）
+  const raySpr = (() => {
+    const c = document.createElement("canvas"); c.width = 64; c.height = 256; const x = c.getContext("2d");
+    const h = x.createLinearGradient(0, 0, 64, 0); for (let i = 0; i <= 16; i++) { const u = i / 16, a = Math.pow(Math.sin(u * Math.PI), 2); h.addColorStop(u, `rgba(170,222,214,${a.toFixed(3)})`); }
+    x.fillStyle = h; x.fillRect(0, 0, 64, 256);
+    const v = x.createLinearGradient(0, 0, 0, 256); v.addColorStop(0, "rgba(0,0,0,1)"); v.addColorStop(0.6, "rgba(0,0,0,0.4)"); v.addColorStop(1, "rgba(0,0,0,0)");
+    x.globalCompositeOperation = "destination-in"; x.fillStyle = v; x.fillRect(0, 0, 64, 256);
+    return c;
+  })();
   const NF = 900;
   const fish = Array.from({ length: NF }, (_, i) => ({ i, a: rnd(0, 6.283), r: Math.sqrt(rnd()), w: rnd(0.32, 0.55), ph: rnd(0, 6.283), lane: rnd(), s0: rnd(), sz: rnd(0.75, 1.2), b: rnd(0.45, 1), late: i >= NF * 0.42, sp: rnd(0.85, 1.15) }));
 
@@ -339,7 +349,7 @@ const TairyoScene = (() => {
   }
 
   function fishPos(f, t, rt) {
-    // A：網から逃れた群れが渦を巻く / B：「何万の」で群れが画面を満たす / C：「とむらい」の「と」から、とむらいの列
+    // A：網から逃れた群れが渦を巻く / B：「何万の」で群れが画面を満たす / C：「とむらひ」の「と」から、とむらいの列
     const wA = 1 - ss(L8.t - 0.4, L8.end + 1.2, t), wC = ss(tR - 0.3, tR + 3.2, t), wB = (1 - wA) * (1 - wC);
     let x = 0, y = 0;
     if (wA > 0) {
@@ -355,12 +365,12 @@ const TairyoScene = (() => {
       y += wB * (DIVE + (0.08 + 0.84 * f.lane) * H + 28 * Math.sin(bx * 0.011 + f.lane * 9 + rt * 0.5));
     }
     if (wC > 0) {
-      const u = ((f.s0 + 0.011 * (t - tR) * f.sp) % 1 + 1) % 1;
+      const u = ((f.s0 + 0.017 * (t - tR) * f.sp) % 1 + 1) % 1;
       const base = DIVE + 0.40 * H + 0.10 * H * ss(L10.t, tEnd, t);
       const px = -0.15 * W + 1.3 * W * u;
       const py = base + 0.18 * H * Math.sin(u * Math.PI * 1.5 + 0.4) + 0.20 * H * u;
       const nx = -0.18 * H * Math.cos(u * Math.PI * 1.5 + 0.4) * Math.PI * 1.5 / (1.3 * W) - 0.2 * H / (1.3 * W);
-      const th = (f.r - 0.5) * 44 * (1 - 0.4 * u);
+      const th = (f.r - 0.5) * 84 * (1 - 0.4 * u);
       x += wC * (px + nx * th * 0.4);
       y += wC * (py + th + Math.sin(rt * 0.8 + f.ph) * 1.5);
     }
@@ -389,8 +399,8 @@ const TairyoScene = (() => {
         g.fillStyle = cg; g.beginPath(); g.ellipse(x, c.y, c.w / 2, c.h, 0, 0, Math.PI * 2); g.fill();
       }
 
-      // 日
-      const sx = 0.68 * W, sy = HZ + 10 - 0.13 * H * ss(0, tD + 3.4, t);
+      // 日：二つの大漁旗のあいだから昇る（旗の真後ろだと、旗の赤い丸と重なって日が二つに見える）
+      const sx = 0.585 * W, sy = HZ + 10 - 0.13 * H * ss(0, tD + 3.4, t);
       const glow = g.createRadialGradient(sx, sy, 6, sx, sy, 300);
       glow.addColorStop(0, `rgba(255,214,150,${0.55 + 0.25 * dawn})`); glow.addColorStop(0.25, `rgba(255,170,110,${0.22 + 0.18 * dawn})`); glow.addColorStop(1, "rgba(255,150,100,0)");
       g.fillStyle = glow; g.fillRect(0, -20, W, HZ + 20);
@@ -430,10 +440,9 @@ const TairyoScene = (() => {
       g.globalCompositeOperation = "lighter";
       for (const r of rays) {
         const x0 = r.x + 22 * Math.sin(rt * 0.22 + r.ph), a = (0.06 + 0.035 * Math.sin(rt * 0.5 + r.ph)) * (1 - 0.6 * ss(tR + 1, tEnd - 2, t));
-        const lg = g.createLinearGradient(0, WL, 0, WL + 1.1 * H);
-        lg.addColorStop(0, `rgba(170,222,214,${a})`); lg.addColorStop(1, "rgba(170,222,214,0)");
-        g.fillStyle = lg; g.beginPath();
-        g.moveTo(x0 - r.w / 2, WL); g.lineTo(x0 + r.w / 2, WL); g.lineTo(x0 + r.w * 1.6 + r.sk, WL + 1.1 * H); g.lineTo(x0 - r.w * 0.4 + r.sk, WL + 1.1 * H); g.closePath(); g.fill();
+        const bw = r.w * 2.6, hh = 1.1 * H;
+        g.save(); g.globalAlpha = Math.min(1, a * 1.7);
+        g.transform(bw / 64, 0, (0.6 * r.w + r.sk) / 256, hh / 256, x0 - bw / 2, WL); g.drawImage(raySpr, 0, 0); g.restore();
       }
       g.globalCompositeOperation = "source-over";
     }
@@ -560,14 +569,20 @@ const TairyoScene = (() => {
     /* ---- 鰮の群れ ---- */
     const fishA = ss(L7.t - 3, L7.t + 0.5, t);
     if (fishA > 0.01 && cam > 0.25 * H) {
-      const dimC = ss(tR, tR2, t), fade = 1 - ss(tOut - 0.6, tEnd - 1, t);
+      const dimC = ss(tR, tR2, t), fade = 1 - ss(tOut - 0.4, tOut + 1.9, t);
       const lateA = ss(L8.t - 0.3, L8.end + 0.6, t);   // 「何万の」の字とともに、群れが増える
+      const clearW = 1 - ss(tR + 1.6, tR + 3.6, t);     // 字の所をあけておく強さ。列がまとまるまで保つ
+      const thin = 1 - ss(tR + 0.5, tR + 4.5, t);       // 列になるとき、半分あまりは去る（詰まると魚でなく帯に見える）
       for (const f of fish) {
-        let a = fishA * fade * (f.late ? lateA : 1);
+        let a = fishA * fade * (f.late ? lateA : 1) * (f.lane < 0.42 ? 1 : thin);
         if (a < 0.02) continue;
         const [x, y] = fishPos(f, t, rt); const sy = y - cam;
         if (sy < -20 || sy > H + 20 || x < -20 || x > W + 20) continue;
-        const [x2, y2] = fishPos(f, t - 0.05, rt - 0.05);
+        // 字のある所（右上）では魚をうすくして、字に重ねない。列になったあとは字の下を通るので、そのまま
+        a *= 1 - 0.8 * clearW * ss(0.24 * W, 0.36 * W, x) * (1 - ss(0.36 * H, 0.45 * H, sy));
+        if (a < 0.02) continue;
+        // 向きは進む道すじから取る（rt を動かすと、ゆらぎの上下で魚が縦に立って見える）
+        const [x2, y2] = fishPos(f, t - 0.12, rt);
         const an = Math.atan2(y - y2, x - x2);
         const c = Math.cos(an) * f.sz, s2 = Math.sin(an) * f.sz;
         g.setTransform(S * c, S * s2, -S * s2, S * c, S * x, S * sy);
@@ -597,7 +612,7 @@ const TairyoScene = (() => {
     const vg = g.createRadialGradient(W / 2, H * 0.46, H * 0.32, W / 2, H * 0.46, H * 0.86);
     vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(0,0,0,.55)");
     g.fillStyle = vg; g.fillRect(0, 0, W, H);
-    const end = ss(tOut + 0.4, tEnd - 0.5, t); if (end > 0) { g.fillStyle = `rgba(2,3,6,${end * 0.92})`; g.fillRect(0, 0, W, H); }
+    const end = ss(tOut + 0.2, tOut + 2.4, t); if (end > 0) { g.fillStyle = `rgba(2,3,6,${end * 0.92})`; g.fillRect(0, 0, W, H); }
   }
 
   return { render };
@@ -966,6 +981,101 @@ class Engine {
     this.stereoSrc(this.brown, w0, lp); lp.connect(ga); ga.connect(gb); gb.connect(b);
   }
 
+}
+
+/* ===================== 楽譜：大漁 ===================== */
+// 時刻はすべて、声に出して読む時間の表（TAIRYO_T、10_tairyo_scene.js）から取る
+const TairyoScore = {
+  // 全体の大きさ 0.7：ほかの演目（竹・落葉松は −20 LUFS）にそろえる（1 のままだと −16.9 LUFS）
+  master: [[0, 0.7], [TAIRYO_T.out + 1.9, 0.7], [TAIRYO_T.dur, 0.0001]],
+  setup(E) {
+    const T = TAIRYO_T, D = T.dive;
+    // 祭りの音：水にもぐるとこもり、「とむらひ」のあいだも遠く鳴って、「するだらう。」のあとに消える
+    E.makeBus("fest", { lp: [[0, 16000], [D - 0.1, 16000], [D + 4.6, 380]], gain: [[0, 0.82], [D - 0.1, 0.82], [D + 4.6, 0.51], [T.rin, 0.37], [T.end + 0.8, 0.0001]], send: 0.16 });  // 0.82：もぐる直前の祭りの山を −3dB 以下に
+    E.makeBus("sea", { send: 0.55, gain: [[0, 0.86]] });  // 海の中の山（「何万の」の間）を −3dB 以下に
+    E.makeBus("direct");
+  },
+  sustain(E, off) {
+    const T = TAIRYO_T, T0 = E.T0, at = t => T0 + Math.max(0, t - off), b = E.bus, D = T.dive;
+    const L7 = TAIRYO_L(3, 0), L8 = TAIRYO_L(3, 1), L10 = TAIRYO_L(3, 3);
+    if (off < D + 4.4) E.ambience(T0, [[0, 0], [1.5, 1], [D - 0.1, 1], [D + 3.4, 0]], b.fest, 620, 0.5, 0.12);
+    if (off < T.dur) E.ambience(at(D + 0.9), [[D + 0.9, 0], [D + 4.4, 1], [T.out + 0.4, 1], [T.dur, 0]], b.sea, 230, 0.9, 0.05);
+    // 低い持続音：「海のなかでは」の前から／「何万の」で影の和音／「と」から／「するだらう」から余韻まで
+    const pads = [[L7.t - 1.5, L8.t + 0.1, [50, 57, 62]], [L8.t, T.rin + 0.2, [51, 55, 58]], [T.rin, L10.t + 0.3, [43, 50, 58]], [L10.t, T.dur - 1.5, [50, 57]]];
+    for (const [a, z, notes] of pads) { if (off < z) E.pad(at(a), T0 + (z - off), notes, off > a ? 0.6 : 2.6, b.sea); }
+  },
+  build(E) {
+    const T = TAIRYO_T, ev = [], B = TAIRYO_B, BAR = 4 * B, S0 = TAIRYO_S0, b = E.bus;
+    const add = (t, f) => ev.push({ t, f });
+    add(0.6, w => E.kane(w, 0.5, b.fest));
+    add(1.0, w => E.fue(w, 81, 2.4, 0.85, b.fest, { glideTo: 86, glideTime: 0.45 }));
+    // 篠笛：一連の掛け声に重ねて始まり、上りつめた長い音が、「やうだけど」の「け」の字で半音下がる
+    let bt = 0;
+    for (const [m, d] of TAIRYO_MEL) { const t = S0 + bt * B; if (m) add(t, w => E.fue(w, m, d * B * 0.94, 0.9, b.fest)); bt += d; }
+    add(T.ln, w => E.fue(w, 81, 4 * B, 1.0, b.fest, { bendTo: 80, bendAt: T.bend - T.ln, bendTime: 1.1 }));
+    // 祭り太鼓：水にもぐっても止まらず、こもって鳴り続ける。「だ」の字の拍は、下の打ち込みに替える
+    const isDa = t => T.da.some(d => Math.abs(d - t) < 0.02), last = T.end + 0.8;
+    for (let k = 0; S0 + k * BAR < last; k++) {
+      const b0 = S0 + k * BAR, on = (i, f) => { const t = b0 + i * B / 2; if (!isDa(t) && t < last) add(t, f); };
+      [[0, 1], [4, 0.75], [6, 0.55], [7, 0.7]].forEach(([i, v]) => on(i, w => E.odaiko(w, v, b.fest)));
+      for (let i = 0; i < 8; i++) on(i, w => E.shime(w, i % 2 ? 0.55 : 1, b.fest));
+      [[0, 0.9], [2, 0.6], [3, 0.5], [4, 0.9], [6, 0.6], [7, 0.5]].forEach(([i, v]) => on(i, w => E.kane(w, v, b.fest)));
+    }
+    // 「〜だ」の行：「だ」の字が出る瞬間に大太鼓を打ち込む。「大漁だ」は二度とも「ドドン」と前打ちを付ける
+    T.lines.forEach(l => {
+      if (l.da === null) return;
+      if (l.html.startsWith("大漁")) add(l.da - B / 4, w => E.odaiko(w, 0.6, b.fest));
+      add(l.da, w => { E.odaiko(w, 1, b.fest); E.bdrum(w, 0.7, b.fest); E.shime(w, 0.9, b.fest); E.kane(w, 1.0, b.fest); });
+    });
+    // 水にもぐる
+    const D = T.dive, L7 = TAIRYO_L(3, 0), L8 = TAIRYO_L(3, 1), L10 = TAIRYO_L(3, 3);
+    add(D + 0.25, w => E.splash(w, b.direct));
+    const Rb = mulberry(77);
+    for (let i = 0; i < 34; i++) { const t = D + 0.3 + Math.pow(Rb(), 1.6) * 5.2; add(t, w => E.bubble(w, 1, b.sea)); }
+    for (let i = 0; i < 16; i++) { const t = L7.t - 0.5 + Rb() * (T.dur - 2.5 - L7.t); add(t, w => E.bubble(w, 0.5, b.sea)); }
+    // 箏：言葉の字に合わせて弾き、行のあいだには新しい音を入れない。最後の行のあとは、ゆっくり下りて余韻にする
+    const K = (t, m, v) => add(t, w => E.koto(w, m, v, b.sea));
+    K(L7.times[0], 69, .8); K(L7.times[2], 70, .7); K(L7.times[5], 69, .75);                          // 海・な・は
+    K(L8.times[0], 74, .8); K(L8.times[1], 75, .7); K(L8.times[2], 74, .7); K(L8.end, 69, .75);         // 何・万・の、数の重さの間へ響き残る
+    K(T.rin, 50, .9); add(T.rin, w => E.rin(w, 0.72, b.sea));                                          // 「とむらひ」の「と」で、りん
+    K(L10.times[0], 67, .6); K(L10.times[2], 69, .55); K(L10.times[4], 70, .7);                       // す・だ・う
+    K(T.end + 0.8, 69, .65); K(T.end + 1.8, 67, .6); K(T.end + 3.0, 62, .8);                          // 余韻：A・G・D と下りる
+    add(T.rin2, w => E.rin(w, 0.45, b.sea));
+    K(T.out + 0.4, 74, .3);
+    return ev;
+  }
+};
+
+/* ===================== 演目：大漁 ===================== */
+{
+  const T = TAIRYO_T, r2 = x => +x.toFixed(2), L = (k, j) => r2(TAIRYO_L(k, j).t);
+  // 画面の字は原文どおり二連に分ける（一連 4 行／二連 6 行）。「浜は祭りの／やうだけど」は、もぐる途中だけ引いて海の中で戻し、二連がそろって見えるようにする
+  const lines = T.lines.map(l => ({ t: r2(l.t), g: Math.min(l.g, 1), html: l.html, gap: l.g === 1 && l.j === 0, alt: l.g === 2, units: l.units, times: l.times }));
+  POEMS.tairyo = {
+    id: "tairyo", title: "大漁", author: "金子みすゞ", year: "1924", dur: T.dur, fs: 37, reveal: "mora",
+    turn: { t: r2(T.dive + 0.4), label: "水にもぐる" },
+    meta: `金子みすゞ　初出『童話』1924年3月号　上演 ${Math.floor(T.dur / 60)}:${String(Math.round(T.dur % 60)).padStart(2, "0")}`,
+    aria: "大漁の映像。朝焼けの浜の祭りから、海の中の鰮の群れへ",
+    lines,
+    groups: [{ out: [r2(L(2, 0) - 1.5), r2(L(2, 0) - 0.6)] }, { out: [r2(T.out), r2(T.out + 1)], tone: "sea", dip: [r2(T.dive + 0.5), r2(T.dive + 1.4), r2(L(3, 0) - 2.2), r2(L(3, 0) - 1.0)] }],   // もぐる途中は旗や舟が字の後ろを通るので字を引き、海の中で二行を戻してから「海のなかでは」を続ける
+    titleFade: [3.0, 3.8], credit: [r2(T.out + 2.4), r2(T.out + 3.6)],   // 画面が暗くなってから出す
+    creditHTML: "金子みすゞ「大漁」<small>初出『童話』1924年3月号<br>映像と音楽は、この詩のためにコードで作りました</small>",
+    cues: [
+      ["文字", "声に出して読む速さで、一字ずつ現れます。行の長さと改行の間が、そのまま時間になります。前半は祭りの弾む速さ（一音およそ 0.125 秒）です。「だ」で終わる行は、「だ」の字が出る瞬間に大太鼓が鳴ります。「大漁だ」は二度とも打ち鳴らされます。「やうだけど」の「けど」のあとは、文の途中ですが長い間をとり、水にもぐります。「海のなかでは」からは、とむらいの静けさで一行ごとに遅くなります（一音 0.17 秒から 0.2 秒へ）。「何万の」のあとには、数の重さの間を置きます。「するだらう。」が最も遅く、余韻を長く残します。本文は旧かなづかいです。「やうだけど」は「ようだけど」、「とむらひ」は「とむらい」、「だらう」は「だろう」と読みます。"],
+      ["映像", "縦の画面を水面で上下に分けます。上は朝焼けの浜の祭り、下は海の中。「やうだけど」で視点が水にもぐり、魚の側に移ります。"],
+      ["音楽", "前半は陽音階（<span class=\"scale\">D・E・G・A・B</span>）の篠笛と祭り太鼓。後半は陰音階（<span class=\"scale\">D・E♭・G・A・B♭</span>）の箏と、低い持続音。箏は言葉の字に合わせて弾き、行のあいだには余韻だけを残します。"],
+      ["転換", "水にもぐっても、祭りの太鼓は止まりません。水越しにこもって、遠く鳴り続けます。「とむらひ」の「と」の字で、りんが一つ鳴ります。太鼓は「するだらう。」を読み終えたあとに消えます。"]
+    ],
+    reading: [
+      { t: L(1, 0), q: "朝焼小焼だ／大漁だ", read: "童謡「夕焼小焼」と同じ、弾む調子で始まります。「大漁だ」を二度くり返して、浜の歓声そのものになります。", sound: "八音と五音。「あさやけ・こやけだ」は四音ずつ弾み、「やけ」が二度鳴ります。母音は a が多く、口を大きく開く明るい音です。行末の「だ」は言い切りの強い音です。一音およそ 0.125 秒の速さで読み、「だ」の字に大太鼓を打ち込みます。", stage: "朝焼けの空、波打つ大漁旗、手を挙げる浜の人。陽音階の篠笛と祭り太鼓。" },
+      { t: L(1, 2), q: "<ruby>大羽<rt>おほば</rt></ruby><ruby>鰮<rt>いわし</rt></ruby>の", read: "脂の乗った大きな鰮。獲れた物の姿がはっきり見えます。", sound: "七音の「大羽鰮の」（おおば・いわしの）は句読点がなく、次の「大漁だ。」へ一息に流れます。二度目の「大漁だ」には「。」が付き、歓声がそこで言い切られます。二度の「だ」は、どちらも小節の頭の太鼓に重なります。", stage: "水面の下で、網いっぱいの鰮が光ります。二度目の「大漁だ。」で、浜はいちばん沸きます。" },
+      { t: L(2, 0), q: "浜は祭りの／やうだけど", read: "「けど」で見方が反転します。祭りを打ち消すのではなく、もう一つの見え方を隣に並べています。", sound: "七音と五音。「はまは・まつりの」と a の明るい音が四つ続き、「けど」で e・o の音に沈みます。言い切りの「だ」は、ここで「やうだ」に変わり、「けど」で折れます。文は終わらず、「するだらう。」まで一続きです。祭りの速さのまま読み、その文の途中に、水にもぐる長い間を置きます。", stage: "「け」の字で、笛の長い音が半音下がります。視点が水にもぐり、魚の側に移ります。" },
+      { t: L(3, 0), q: "海のなかでは／何万の", read: "浜は一つの祭り、海の中は何万の命。数の対比で、喜びの裏にある重さが見えます。", sound: "七音と五音。ここから読む速さを落とします（一音およそ 0.17 秒から）。「なんまんの」は「ん」が二つ入る、口を閉じてこもる音です。「何万の」のあとに、数の重さを受け止める間を置きます。", stage: "網を逃れた群れが渦を巻きます。「何万」の字とともに群れが増え、画面いっぱいに広がります。音楽は陰音階に変わります。" },
+      { t: L(3, 2), q: "<ruby>鰮<rt>いわし</rt></ruby>のとむらひ／するだらう。", read: "「だらう」は想像です。作者は海の中を見ていません。見えない所の悲しみを思いやっています。みすゞの育った漁師町・仙崎の対岸の青海島には鯨の墓があり、獲った命を供養する習わしがあります。漁を責める詩ではなく、獲る側と獲られる側の両方を見つめる詩です。", sound: "初めの二行と同じ、八音と五音に戻ります。「いわし」は、獲れた物から弔われる者になって、もう一度出てきます。「大漁だ」の「だ」は「だらう」になり、言い切りが推量に変わります。「するだらう」は、読むと「するだろう」。u が三つ入る、口をすぼめる暗い音です。最も遅く（一音およそ 0.2 秒）読み、最後の「う」をのばします。", stage: "「とむらひ」の「と」の字で、りんが一つ鳴ります。群れは一筋の列になって深みへ下ります。祭りの太鼓は水越しに遠く鳴り、読み終えると消えます。" }
+    ],
+    rights: "作者は 1930 年に亡くなり、作品は日本でも米国でも著作権の保護期間が終わっています。初出は雑誌『童話』1924 年 3 月号です。本文は旧かなづかいのままで、旧字体だけを新字体に改めています。",
+    scene: TairyoScene, score: TairyoScore
+  };
 }
 
 /* ===================== 竹：本文と、声に出す時間 ===================== */
@@ -1887,7 +1997,7 @@ const KaramatsuScore = {
 }
 
 /* ===================== 演目のデータ ===================== */
-const PROGRAMS = [{ id: "take" }, { id: "karamatsu" }, { soon: true, title: "大漁", author: "金子みすゞ", year: "1924" }];
+const PROGRAMS = [{ id: "take" }, { id: "karamatsu" }, { id: "tairyo" }, { soon: true, title: "こころ", author: "萩原朔太郎", year: "1913" }];
 
 /* ===================== 上演の進行 ===================== */
 const $ = id => document.getElementById(id);
@@ -2039,7 +2149,7 @@ window.addEventListener("hashchange", () => { const id = location.hash.slice(1);
 function updateVerse(t) {
   titleCard.style.opacity = (1 - ss(P.titleFade[0], P.titleFade[1], t)).toFixed(3);
   P.lines.forEach((l, i) => {
-    const gr = P.groups[l.g], gOut = 1 - ss(gr.out[0], gr.out[1], t), el = lineEls[i];
+    const gr = P.groups[l.g], dip = gr.dip ? ss(gr.dip[0], gr.dip[1], t) * (1 - ss(gr.dip[2], gr.dip[3], t)) : 0, gOut = (1 - ss(gr.out[0], gr.out[1], t)) * (1 - dip), el = lineEls[i];   // dip：場面が字の後ろを通るあいだ、いったん字を引く
     if (el._chs) {
       // 一字ずつ：声に出して読む速さで、墨がにじむように
       const lo = t >= l.t - 0.05 ? gOut : 0;
@@ -2080,7 +2190,7 @@ function frame() {
 }
 
 resize();
-load(POEMS[location.hash.slice(1)] ? location.hash.slice(1) : "karamatsu");
+load(POEMS[location.hash.slice(1)] ? location.hash.slice(1) : "tairyo");
 requestAnimationFrame(frame);
 
 // 確かめ用：指定の秒の絵を出す（音は鳴らさない）
