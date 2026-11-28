@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>詩景 ― 金子みすゞ「大漁」</title>
-<meta name="description" content="詩に、景色と音を。一編ずつ、その詩のための映像と音楽をコードで仕立てて上演します。第3回は金子みすゞ「大漁」。朝焼けの浜の祭りから、海の中の鰮の群れへ。字の現れる速さで。">
+<title>詩景 ― 宮沢賢治「春と修羅 序」</title>
+<meta name="description" content="詩に、景色と音を。一編ずつ、その詩のための映像と音楽をコードで仕立てて上演します。第4回は宮沢賢治『春と修羅』の序（はじめの一連）。雪の岩手山のふもと、仮定された電燈に青い照明がともる。幻燈のように、字の現れる速さで。">
 <meta property="og:type" content="website">
-<meta property="og:title" content="詩景 ― 金子みすゞ「大漁」">
-<meta property="og:description" content="詩に、景色と音を。一編ずつ、その詩のための映像と音楽をコードで仕立てて上演します。第3回は金子みすゞ「大漁」。朝焼けの浜の祭りから、海の中の鰮の群れへ。字の現れる速さで。">
+<meta property="og:title" content="詩景 ― 宮沢賢治「春と修羅 序」">
+<meta property="og:description" content="詩に、景色と音を。一編ずつ、その詩のための映像と音楽をコードで仕立てて上演します。第4回は宮沢賢治『春と修羅』の序（はじめの一連）。雪の岩手山のふもと、仮定された電燈に青い照明がともる。幻燈のように、字の現れる速さで。">
 <meta name="twitter:card" content="summary_large_image">
 <meta property="og:url" content="https://shikei-jp.github.io/">
-<meta property="og:image" content="https://shikei-jp.github.io/og_tairyo.png">
+<meta property="og:image" content="https://shikei-jp.github.io/og_shura.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@500;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
@@ -1996,8 +1996,632 @@ const KaramatsuScore = {
   };
 }
 
+/* ===================== 春と修羅 序（冒頭の一連）：本文と、声に出す時間 ===================== */
+// 宮沢賢治『心象スケッチ 春と修羅』（関根書店、1924）の「序」の第一連、十行。初版の紙面で確かめた（note/shura_sources.md）。
+// 旧かなづかいのまま、旧字体だけ新字体に（假→仮、靈→霊）。「電燈」の「燈」は時代の字のまま。十行目の読点は初版の形。
+const SHU_TEXT = [
+  "わたくしといふ現象は", "仮定された有機交流電燈の", "ひとつの青い照明です", "（あらゆる透明な幽霊の複合体）",
+  "風景やみんなといつしよに", "せはしくせはしく明滅しながら", "いかにもたしかにともりつづける", "因果交流電燈の", "ひとつの青い照明です",
+  "（ひかりはたもち、その電燈は失はれ）"
+];
+const SHU_KANJI = { "現": 2, "象": 2, "仮": 1, "定": 2, "有": 2, "機": 1, "交": 2, "流": 2, "電": 2, "燈": 2, "青": 2, "照": 2, "明": 2, "透": 2, "幽": 2, "霊": 2, "複": 2, "合": 2, "体": 2, "風": 2, "景": 2, "滅": 2, "因": 2, "果": 1, "失": 3 };
+// 字の頁：一つめの文と、そのささやき（一〜四行）／二つめの文（五〜九行）／終わりのささやき（十行）
+const SHU_PAGE = [0, 0, 0, 0, 1, 1, 1, 1, 1, 2];
+// 読む速さ：考えながら言うように。「せはしくせはしく」の行だけ少し速く、終わりのささやきはゆっくり
+const SHU_MORA = [0.16, 0.16, 0.17, 0.15, 0.15, 0.135, 0.15, 0.17, 0.18, 0.2];
+const SHU_REST = [0.6, 0.6, 1.3, 1.0, 0.5, 0.5, 0.9, 0.6, 1.5, 0];   // 行のあとの間（「です」で長く）
+const SHU_T = (() => {
+  let t = 4.4; const lines = [];
+  SHU_TEXT.forEach((html, i) => {
+    if (i > 0 && SHU_PAGE[i] !== SHU_PAGE[i - 1]) t += 1.0;   // 字の頁が替わる間
+    const m = SHU_MORA[i], units = verseUnits(html, SHU_KANJI), times = []; let c = t;
+    units.forEach((u, k) => {
+      const mo = u.html === "（" || u.html === "）" ? 0.4 : u.mora;   // かっこは、息をひそめる短い間
+      times.push(c); c += mo * m;
+      if (u.punct === "、" && k < units.length - 1) c += 0.45;
+    });
+    lines.push({ t, g: SHU_PAGE[i], j: i, html, units, times, end: c, m });
+    t = c + SHU_REST[i];
+  });
+  const end = lines[lines.length - 1].end;
+  return { lines, end, dur: +(end + 12).toFixed(2) };
+})();
+const SHU_END = SHU_T.end, SHU_DUR = SHU_T.dur;
+
+/* ===================== 映像：春と修羅 序 ===================== */
+// 大正の幻燈（ガラスの絵を灯で映す見世物）のように描く。手で色をさしたガラス絵を、ゆらぐ灯で映した味（灯の丸・明るさのゆらぎ・色むら・ほこり・わずかな揺れ・まわりの落ち）。
+// 序の日付（大正十三年一月）にあわせて、雪のふる冬の夜。雪の岩手山のふもとに電信柱が奥へ続き、そりの道の先に南部の曲り家がある。
+//   はじめ：幻燈の灯がまるくひらいて、絵があらわれる
+//   一〜三行：手前から二本めの柱に、輪郭だけの電燈（仮定された電燈）が描かれ、「青」で青い光がともる。降る雪が青く光り、雪の上に光だまり
+//   四行：野のものから透明な幽霊が離れ（枯れ木・杉・遠くの家の人・曲り家の人と馬・兎・狐・鳥・子ども・星）、一つずつ光にとけこむ。とけこむたびに光がふくらむ
+//   五〜七行：村の窓・ほかの電燈・星が、いっせいに、だんだん速く明滅する。暗くなる拍に、幽霊たちの輪郭がもとの場所に透ける。青い光だけは、ゆらぎながらともりつづける
+//   八〜九行：電線を光の粒が行き来し、窓・木・山・星のあいだに光の糸が張られる（因果交流）。二度めの「青」で、結び目の光が電燈に集まる
+//   十行：電燈の輪郭と柱と電線が消え、青い光だけが残って空へのぼる。カメラが見上げ、光は岩手山の上、天の川のそばで星になり、星々が順にまたたく
+//   終わり：幻燈の灯がまるく閉じても、青い星だけがしばらく残る（ひかりはたもち、その電燈は失はれ）
+const ShuraScene = (() => {
+  const R = mulberry(19240120), rnd = (a = 0, b = 1) => a + (b - a) * R();
+  const T = SHU_T, L = i => T.lines[i], END = T.end, DUR = T.dur;
+  const sm = u => u * u * (3 - 2 * u);
+  const mk = (w, h) => { const c = document.createElement("canvas"); c.width = Math.max(1, Math.ceil(w)); c.height = Math.max(1, Math.ceil(h)); return c; };
+  const col = (c, a = 1) => `rgba(${Math.round(c[0])},${Math.round(c[1])},${Math.round(c[2])},${(a < 0 ? 0 : a > 1 ? 1 : a).toFixed(3)})`;
+  const Q = 2, HZ = 612, TOP = -330;   // 空は絵の上へものびる（終わりに見上げる）
+  const BLUE = [110, 170, 255], WARM = [255, 196, 112];
+
+  /* ---- 時刻 ---- */
+  const IGN = L(2).times[4], IGN2 = L(8).times[4], LOST = L(9).times[11];   // 一度めと二度めの「青」、十行の「電燈」
+  const lampDraw = t => ss(L(1).t - 0.2, L(1).end + 0.4, t);              // 電燈の輪郭が描かれていく
+  const ignite = t => ss(IGN - 0.05, IGN + 0.5, t);                        // 「青」でともる
+  const lostK = t => ss(LOST - 0.2, L(9).end + 1.2, t);                    // 「その電燈は失はれ」で消える
+  const riseK = t => sm(ss(L(9).t + 0.4, END + 5.4, t));                  // 青い光が空へのぼる
+  const STAR = END + 5.6;                                                  // のぼった光が星になる
+  const IRIS = [0.25, 2.9, END + 6.8, END + 8.2];                          // 幻燈の灯の丸：ひらく・とじる
+  const irisK = t => t < IRIS[2] ? sm(ss(IRIS[0], IRIS[1], t)) : 1 - sm(ss(IRIS[2], IRIS[3], t));
+  const starFade = t => 1 - ss(END + 9.4, DUR - 0.3, t);
+  // 明滅の拍：五〜七行で、だんだん速く（楽譜も同じ拍で鳴る）
+  const PULSE = (() => { const out = []; let t = L(4).t + 0.15; const t1 = L(6).end + 0.2; while (t < t1) { out.push(t); const u = (t - L(4).t) / (t1 - L(4).t); t += lerp(0.34, 0.16, u); } return out; })();
+  const pulseAt = t => { let v = 0; for (const p of PULSE) { const d = t - p; if (d >= 0 && d < 0.14) v = Math.max(v, 1 - d / 0.14); } return v; };
+  const flickK = t => ss(L(4).t - 0.2, L(4).t + 0.4, t) * (1 - ss(L(6).end + 0.1, L(6).end + 0.9, t));
+  // 電線をつたう光の粒（八〜九行）
+  const NET = (() => { const out = [], r = mulberry(55); for (let i = 0; i < 26; i++) out.push({ t0: L(7).t - 0.2 + r() * (L(8).end - L(7).t + 0.6), a: (r() * 8) | 0, dir: r() < 0.6 ? 1 : -1, sp: 0.55 + r() * 0.4, w: r() < 0.5 ? 0 : 1 }); return out; })();
+  const netK = t => ss(L(7).t - 0.4, L(7).t + 0.6, t) * (1 - ss(L(8).t + 0.4, L(8).end + 0.6, t));
+
+  /* ---- 物の置き場所 ---- */
+  const POLES = [[64, 950, 440], [132, 806, 250], [178, 730, 160], [212, 686, 108], [238, 660, 76], [258, 644, 56], [274, 634, 42], [287, 627, 32], [297, 622, 25]].map(([x, y, h]) => ({ x, y, h, top: y - h, arm: h * 0.24 }));
+  const LAMP = (() => { const p = POLES[1]; return { x: p.x + p.arm * 0.9 + 6, y: p.top + 26 }; })();   // 青い電燈：手前から二本めの柱の腕に
+  const LP = { x: LAMP.x, y: LAMP.y + 9 };      // 青い光の中心（電球）
+  const FX = 226, FY = 104;                     // 光がのぼって星になる所（岩手山の上、天の川の中）。終わりの字幕より上
+  const MAGARI = { x: 338, y: 672, s: 0.85 };   // 南部の曲り家（そりの道の先）
+  const MP = (a, b) => [MAGARI.x + a * MAGARI.s, MAGARI.y + b * MAGARI.s];
+  const TREES = [[96, 668, 42, 11], [116, 672, 30, 12], [396, 690, 36, 13], [26, 700, 58, 14], [250, 640, 22, 15], [286, 648, 26, 16]];   // 冬枯れの木 [x, 根もと, 高さ, 種]
+  const CEDARS = (() => { const r = mulberry(4321); return Array.from({ length: 9 }, (_, i) => ({ px: 428 + i * 16 + r() * 8, h: 160 + r() * 120, by: 772 + r() * 16 })); })();
+  const LIGHTS = [   // ほかの灯：遠くの家・曲り家の窓と馬屋の窓・遠くの灯・遠くの柱の電燈
+    [56, 644, 2.2, 0], [62, 645, 2, 0], [...MP(-30, -7), 2.2, 0], [...MP(-14, -7), 2.2, 0], [...MP(30, -15), 1.3, 0],
+    [22, 628, 1.4, 0], [120, 634, 1.4, 0], [398, 632, 1.6, 0],
+    [POLES[3].x + POLES[3].arm, POLES[3].top + 10, 2.6, 1], [POLES[5].x + POLES[5].arm, POLES[5].top + 6, 1.8, 1], [POLES[7].x + POLES[7].arm, POLES[7].top + 4, 1.3, 1]
+  ].map(([x, y, r, lamp], i) => ({ x, y, r, lamp, ph: rnd(0, 6.28), k: 0.55 + 0.45 * rnd(), i }));
+  const BRIGHT = [[118, 170, 1.9], [36, 90, 1.7], [262, 40, 1.8], [60, 300, 1.6], [180, 250, 1.5], [150, 60, 1.5]];   // 明るい星（糸の結び目にもなる）
+  const STARS = Array.from({ length: 460 }, () => { const x = rnd(-10, W + 10), y = TOP - 10 + Math.pow(rnd(), 1.1) * (HZ - 40 - TOP); return { x, y, r: rnd() < 0.06 ? rnd(1.4, 2.2) : rnd(0.4, 1.2), ph: rnd(0, 6.28), sp: rnd(1, 4), tint: rnd() }; })
+    .concat(BRIGHT.map(([x, y, r]) => ({ x, y, r, ph: rnd(0, 6.28), sp: rnd(1, 2), tint: 0.5 })));
+  const ORION = [[392, 150, 2.2], [446, 136, 1.7], [404, 210, 1.3], [418, 206, 1.3], [432, 202, 1.3], [384, 264, 1.8], [450, 270, 2.3], [416, 236, 0.9], [418, 246, 0.9]];   // 冬の南の空のオリオン（字の後ろなので淡く）
+  const GLINT = Array.from({ length: 70 }, () => ({ x: rnd(0, W), y: rnd(HZ + 30, H), ph: rnd(0, 6.28), sp: rnd(0.6, 2) }));   // 雪のきらめき
+  const SNOW = Array.from({ length: 240 }, () => ({ x: rnd(0, W), y: rnd(), z: Math.pow(rnd(), 1.7), ph: rnd(0, 6.28) }));     // 降る雪（z：手前ほど大きく速い）
+
+  /* ---- 透明な幽霊たち ---- */
+  // 野のものから離れて、ふわりと弧をえがき、一つずつ光にとけこむ。f：生まれる所（足もと）、s0→s1：大きさ（遠くのものは近づくにつれ大きく）
+  const GH = [
+    { k: "tree", f: [26, 700], s0: 1, s1: 0.9, h: 58, seed: 14 },
+    { k: "man", f: [60, 655], s0: 0.2, s1: 0.75 },
+    { k: "star", f: [118, 170] },
+    { k: "cedar", f: [440, 780], s0: 2.4, s1: 0.9 },
+    { k: "woman", f: MP(-4, 0), s0: 0.2, s1: 0.75 },
+    { k: "hare", f: [236, 792], s0: 0.45, s1: 0.5 },
+    { k: "horse", f: MP(30, 5), s0: 0.22, s1: 0.9 },
+    { k: "bird", f: [40, 380], s0: 0.9, s1: 0.7 },
+    { k: "fox", f: [300, 862], s0: 0.6, s1: 0.55 },
+    { k: "star", f: [36, 90] },
+    { k: "child", f: [96, 902], s0: 0.8, s1: 0.6 },
+    { k: "star", f: [262, 40] }
+  ].map((g, i) => { const dist = Math.hypot(LP.x - g.f[0], LP.y - g.f[1]); return { ...g, tm: L(3).t + 0.85 + i * 0.23, dur: 1.5 + 0.0028 * dist, lift: 30 + 0.18 * dist, bend: rnd(-35, 35), ph: rnd(0, 6.28) }; });
+  const MERGES = GH.map(g => g.tm);
+  const bloomAt = t => { let v = 0; for (const m of MERGES) if (t >= m) v += Math.exp(-(t - m) / 0.22); return Math.min(1.5, v); };
+  const mergedAt = t => { let n = 0; for (const m of MERGES) if (t >= m) n++; return n / MERGES.length; };
+
+  /* ---- 因果の糸（八〜九行） ---- */
+  const NODES = [[LP.x, LP.y], [59, 644], MP(-22, -7), MP(30, -15), [22, 628], [120, 634], [398, 632], [26, 651], [96, 632], [396, 659], [282, 452],
+    [CEDARS[0].px, CEDARS[0].by - CEDARS[0].h + 14], [LIGHTS[8].x, LIGHTS[8].y], [LIGHTS[9].x, LIGHTS[9].y]].concat(BRIGHT.map(b => [b[0], b[1]]));
+  const EDGES = (() => {
+    const out = [], seen = new Set(), add = (a, b) => { const key = Math.min(a, b) + "," + Math.max(a, b); if (a === b || seen.has(key)) return; seen.add(key); out.push([a, b]); };
+    NODES.forEach((p, i) => { if (!i) return; NODES.map((q, j) => [Math.hypot(q[0] - p[0], q[1] - p[1]), j]).filter(v => v[1] !== i && v[1] !== 0).sort((a, b) => a[0] - b[0]).slice(0, 2).forEach(v => add(i, v[1])); });
+    [1, 2, 5, 8, 10, 12, 17, 18].forEach(i => add(0, i));   // 電燈とじかにつながる
+    return out.map(([a, b], k) => ({ a, b, t0: L(7).t - 0.2 + (k % 9) * 0.21 + Math.floor(k / 9) * 0.07, ph: rnd(0, 6.28), sp: rnd(0.5, 1.1) }));
+  })();
+
+  /* ---- カメラ ---- */
+  // 一〜四行：電燈へ寄る／五〜七行：少し引いて村を見せる／八〜九行：引ききって糸の網を見せる／十行：光を追って空を見上げる
+  function cam(t) {
+    const push = ss(0.5, L(3).end + 0.3, t) * (1 - 0.75 * ss(L(4).t - 0.4, L(5).end, t)) * (1 - ss(L(7).t - 0.4, L(8).t + 0.6, t)), up = riseK(t);
+    const z = 1 + 0.12 * push + 0.02 * up, mx = W / 2 * (1 - 1 / z) - 0.5;
+    const lo = TOP + H / (2 * z) + 0.5, hi = H - H / (2 * z) - 0.5;   // 空の上端と野の下端の内側（版の外の黒を出さない）
+    return [W / 2 - clamp(80 * push, 0, mx) + clamp(14 * up, 0, mx), clamp(H / 2 + 70 * push - 200 * up, lo, hi), z];
+  }
+
+  /* ---- 止まっている物 ---- */
+  function layer(fn, y0 = 0, h = H) { const c = mk(W * Q, h * Q), x = c.getContext("2d"); x.setTransform(Q, 0, 0, Q, 0, -y0 * Q); x.lineCap = "round"; x.lineJoin = "round"; fn(x); c.y0 = y0; c.hh = h; return c; }
+  const put = (g, c) => g.drawImage(c, 0, c.y0, W, c.hh);
+  function drawSky(x) {
+    const r = mulberry(711);
+    const g = x.createLinearGradient(0, TOP, 0, HZ); g.addColorStop(0, "rgb(3,5,18)"); g.addColorStop(0.45, "rgb(8,14,40)"); g.addColorStop(0.8, "rgb(16,27,62)"); g.addColorStop(1, "rgb(38,54,98)"); x.fillStyle = g; x.fillRect(0, TOP, W, HZ + 10 - TOP);
+    // 天の川：左下から右上へ、淡い帯。光ののぼる先を通り、字の列（右上）はよける
+    x.save(); x.translate(200, 140); x.rotate(-0.95);
+    for (let i = 0; i < 40; i++) { const px = (r() * 2 - 1) * 760, py = (r() - 0.5) * 80, rr = 40 + r() * 80, gr = x.createRadialGradient(px, py, 0, px, py, rr); gr.addColorStop(0, `rgba(150,170,230,${(0.05 + 0.04 * r()).toFixed(3)})`); gr.addColorStop(1, "rgba(150,170,230,0)"); x.fillStyle = gr; x.fillRect(px - rr, py - rr, rr * 2, rr * 2); }
+    for (let i = 0; i < 2600; i++) { const px = (r() * 2 - 1) * 800, py = (r() + r() + r() - 1.5) * 52; x.fillStyle = `rgba(220,228,255,${(0.15 + 0.35 * r()).toFixed(3)})`; x.fillRect(px, py, 0.7, 0.7); }
+    for (let i = 0; i < 14; i++) { const px = (r() * 2 - 1) * 600, py = (r() - 0.5) * 16, rr = 18 + r() * 36, gr = x.createRadialGradient(px, py, 0, px, py, rr); gr.addColorStop(0, "rgba(4,6,18,0.28)"); gr.addColorStop(1, "rgba(4,6,18,0)"); x.fillStyle = gr; x.fillRect(px - rr, py - rr, rr * 2, rr * 2); }   // 天の川の暗い筋
+    x.restore();
+  }
+  function treeStrokes(x, bx, by, h, seed, color) {   // 冬枯れの木（種が同じなら同じ枝ぶり：幽霊の写しにも使う）
+    const r = mulberry(seed); x.strokeStyle = color;
+    const br = (x0, y0, ang, len, w, d) => { const x1 = x0 + Math.cos(ang) * len, y1 = y0 + Math.sin(ang) * len; x.lineWidth = w; x.beginPath(); x.moveTo(x0, y0); x.lineTo(x1, y1); x.stroke(); if (d <= 0) return; for (const s of [-1, 1]) br(x1, y1, ang + s * (0.35 + r() * 0.3), len * 0.68, Math.max(0.4, w * 0.62), d - 1); };
+    br(bx, by, -Math.PI / 2 + (r() - 0.5) * 0.1, h * 0.38, Math.max(0.8, h / 30), 4);
+  }
+  // 岩手山：冬の岩手山の写真を見ながら、稜線・雪の下限・沢の流れを写しとった（写真の画素は使わず、形と向きだけを読んだ）。
+  // 写真の座標（750×507、稜線は色の変わり目から読んだ）を、横 0.9・縦 0.95 倍で置く。右寄りの広い頂（薬師岳）、左に二つめの峰と浅い鞍部、
+  // 左へ長くゆるく下る尾根、右は長くすそをひく一枚の雪の斜面（南部片富士）
+  const PW = (px, py) => [282 + (px - 430) * 0.9, 197.5 + 0.95 * py];
+  const curve = (P, step) => { const out = []; for (let i = 0; i < P.length - 1; i++) { const a = P[i], b = P[i + 1], n = Math.max(1, Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) / step)); for (let j = 0; j < n; j++) out.push([lerp(a[0], b[0], j / n), lerp(a[1], b[1], j / n)]); } out.push(P[P.length - 1]); return out; };
+  const MTN = (() => {
+    const P = [[-60, 372], [0, 368], [20, 365], [40, 365], [60, 361], [80, 361], [95, 361], [105, 359], [112, 353], [120, 350], [135, 345], [150, 341], [160, 335], [170, 333], [180, 329], [195, 325], [205, 320], [220, 314], [230, 310], [240, 307], [250, 305], [260, 303], [270, 301], [280, 296], [290, 293], [300, 290], [310, 286], [320, 282], [330, 281], [340, 279],
+      [350, 280], [360, 283], [370, 285], [376, 284], [382, 279], [388, 274], [395, 273], [405, 273], [415, 271], [422, 268], [430, 267], [438, 267], [445, 270], [452, 273], [460, 276], [470, 282], [480, 289], [490, 293], [500, 299], [510, 304], [520, 311], [530, 316], [540, 324], [550, 331],
+      [560, 336], [570, 341], [580, 347], [590, 353], [600, 357], [612, 364], [625, 370], [640, 373], [660, 379], [680, 385], [700, 391], [720, 396], [745, 400], [800, 410], [900, 420]].map(([a, b]) => PW(a, b));
+    let pts = curve(P, 1.5);
+    pts = pts.map((p, i) => { let sx = 0, sy = 0, sw = 0; for (let j = -2; j <= 2; j++) { const q = pts[clamp(i + j, 0, pts.length - 1)], w = 3 - Math.abs(j); sx += q[0] * w; sy += q[1] * w; sw += w; } return [sx / sw, sy / sw]; });
+    return pts;
+  })();
+  // 雪の下限：頂の下の中ほどは林が上まで来て暗い（写真の暗い V）。右の斜面は深くまで白い
+  const SNOWLINE = curve([[-60, 394], [0, 390], [60, 386], [110, 380], [150, 373], [200, 367], [250, 362], [285, 358], [305, 354], [330, 351], [355, 350], [378, 353], [392, 362], [410, 360], [430, 357], [460, 364], [500, 374], [550, 382], [600, 388], [650, 394], [700, 402], [760, 408], [900, 420]].map(([a, b]) => PW(a, b)), 2);
+  const lookY = (L, xx) => { for (let i = 1; i < L.length; i++) if (L[i][0] >= xx) { const a = L[i - 1], b = L[i]; return lerp(a[1], b[1], (xx - a[0]) / Math.max(1e-6, b[0] - a[0])); } return L[L.length - 1][1]; };
+  const ridgeY = xx => lookY(MTN, xx), snowY = xx => lookY(SNOWLINE, xx);
+  function drawMountain(x) {
+    const r = mulberry(2038), X0 = MTN[0][0], X1 = MTN[MTN.length - 1][0];
+    const mpath = () => { x.beginPath(); x.moveTo(MTN[0][0], MTN[0][1]); for (const p of MTN) x.lineTo(p[0], p[1]); x.lineTo(X1, HZ + 20); x.lineTo(X0, HZ + 20); x.closePath(); };
+    // 細い帯（沢・尾根）を、重ならない一枚の形でぬる（線を継ぐと、つなぎ目が点になる）。hi：左上の縁（光を受けた尾根の雪）
+    const band = (C, rgb, a0, a1, hi) => {
+      if (C.length < 3) return;
+      const lf = [], rt = [];
+      C.forEach((c, j) => { const a = C[Math.max(0, j - 1)], b = C[Math.min(C.length - 1, j + 1)], dx = b[0] - a[0], dy = b[1] - a[1], n = Math.hypot(dx, dy) || 1, nx = -dy / n, ny = dx / n; lf.push([c[0] + nx * c[2] / 2, c[1] + ny * c[2] / 2]); rt.push([c[0] - nx * c[2] / 2, c[1] - ny * c[2] / 2]); });
+      const gr = x.createLinearGradient(0, C[0][1], 0, C[C.length - 1][1]); gr.addColorStop(0, `rgba(${rgb},${a0.toFixed(3)})`); gr.addColorStop(1, `rgba(${rgb},${a1.toFixed(3)})`);
+      x.fillStyle = gr; x.beginPath(); lf.forEach((p, j) => j ? x.lineTo(p[0], p[1]) : x.moveTo(p[0], p[1])); for (let j = rt.length - 1; j >= 0; j--) x.lineTo(rt[j][0], rt[j][1]); x.closePath(); x.fill();
+      if (hi) { x.strokeStyle = `rgba(244,247,255,${hi.toFixed(3)})`; x.lineWidth = 0.5; x.beginPath(); lf.forEach((p, j) => j ? x.lineTo(p[0], p[1]) : x.moveTo(p[0], p[1])); x.stroke(); }
+    };
+    // 流れの線：(x0, y0) から角度 th（真下から左へ正）で、止まる所まで。th は下るほど少し立つ
+    const flow = (x0, y0, th, stop, wmax, bend = 0.25) => { const C = []; let px = x0, py = y0, n = 0; while (n < 120) { const u = Math.min(1, n / 40), t = th * (1 - bend * u); C.push([px, py, 0]); px -= Math.sin(t) * 1.8; py += Math.cos(t) * 1.8; n++; if (stop(px, py)) break; } C.forEach((c, j) => { const u = j / Math.max(1, C.length - 1); c[2] = 0.25 + wmax * Math.pow(Math.sin(Math.PI * Math.min(1, u * 1.08)), 0.6); }); return C; };
+    // 地：雪をかぶった林の青（下ほど暗い）
+    const bg = x.createLinearGradient(0, 447, 0, HZ); bg.addColorStop(0, "rgb(62,74,112)"); bg.addColorStop(1, "rgb(30,38,66)"); x.fillStyle = bg; mpath(); x.fill();
+    x.save(); mpath(); x.clip();
+    // 雪：山ぜんたいを雪でぬり、上ほどあかるく。右の一枚の斜面がいちばん白く、左の面はひだの影で少し灰色
+    const sg = x.createLinearGradient(0, 447, 0, 600); sg.addColorStop(0, "rgb(224,232,251)"); sg.addColorStop(0.55, "rgb(204,215,244)"); sg.addColorStop(1, "rgb(170,184,224)"); x.fillStyle = sg; mpath(); x.fill();
+    const [la, lb] = [PW(440, 268), PW(150, 382)], lg = x.createLinearGradient(la[0], la[1], lb[0], lb[1]); lg.addColorStop(0, "rgba(110,124,170,0)"); lg.addColorStop(0.45, "rgba(110,124,170,0.2)"); lg.addColorStop(1, "rgba(110,124,170,0.36)"); x.fillStyle = lg; x.fillRect(X0, 440, X1 - X0, 180);
+    // 字の下になる右のすそは、少しかげらせる
+    const sh = x.createLinearGradient(360, 0, 540, 0); sh.addColorStop(0, "rgba(24,32,60,0)"); sh.addColorStop(1, "rgba(24,32,60,0.3)"); x.fillStyle = sh; x.fillRect(360, 440, 400, 180);
+    // 左の面のひだ：二つめの峰と頂の左の肩から、左下へ扇のように開く。沢は淡い青灰色の影、そのあいだに光を受けた白い尾根の線
+    { const xa = PW(160, 0)[0], xb = PW(428, 0)[0], fan = xs => (lerp(46, 16, clamp((xs - xa) / (xb - xa), 0, 1)) + (r() - 0.5) * 8) * Math.PI / 180;
+      x.filter = "blur(1.6px)";
+      for (let i = 0; i < 16; i++) {
+        const xs = lerp(xa, xb, (i + 0.5 + (r() - 0.5) * 0.7) / 16), ys = ridgeY(xs) + 5 + r() * 6, wmax = 3 + r() * 4;
+        const C = flow(xs, ys, fan(xs), (px, py) => py > snowY(px) + 8 || px < -60, wmax, 0.1);
+        C.forEach((c, j) => { const u = j / Math.max(1, C.length - 1); c[2] = 0.6 + wmax * Math.pow(Math.min(1, u * 1.4), 0.8); });
+        band(C, "70,84,130", 0.3, 0.42, 0);
+      }
+      x.filter = "none";
+      for (let i = 0; i < 24; i++) {
+        const xs = lerp(xa, xb, (i + 0.5 + (r() - 0.5) * 0.8) / 24), ys = ridgeY(xs) + 1.5 + r() * 3, frac = 0.35 + r() * 0.55;
+        const C = flow(xs, ys, fan(xs), (px, py) => py > ys + (snowY(px) - ys) * frac || px < -60, 1, 0.1);
+        C.forEach((c, j) => { const u = j / Math.max(1, C.length - 1); c[2] = 0.5 + 0.8 * Math.pow(Math.sin(Math.PI * u), 0.6); });
+        band(C, "246,249,255", 0.75, 0.2, 0);
+      } }
+    // 頂の右の肩：右の斜面のふちに、淡い影を三本
+    x.filter = "blur(1.4px)";
+    for (let i = 0; i < 3; i++) { const xs = PW(448 + i * 12 + r() * 6, 0)[0], th = (-4 + r() * 8) * Math.PI / 180, C = flow(xs, ridgeY(xs) + 8 + r() * 8, th, (px, py) => py > snowY(px) + 6, 4, 0); C.forEach((c, j) => { const u = j / Math.max(1, C.length - 1); c[2] = 0.6 + 4 * Math.pow(Math.min(1, u * 1.4), 0.8); }); band(C, "70,84,130", 0.22, 0.32, 0); }
+    x.filter = "none";
+    // 右の斜面：なめらかな一枚の雪（線は引かない。稜線と平行な線は、二重の輪郭に見える）
+    // 林：雪の下限から下を、境目をぼかして暗く（頂の下の中ほどは、林が高くまで来る）。細い帯を並べると縦の継ぎ目が出るので、一枚の形をぼかす
+    x.filter = "blur(6px)"; x.fillStyle = "rgba(44,56,94,0.62)"; x.beginPath(); x.moveTo(X0, snowY(X0) + 6); for (const p of SNOWLINE) x.lineTo(p[0], p[1] + 6); x.lineTo(X1, HZ + 30); x.lineTo(X0, HZ + 30); x.closePath(); x.fill(); x.filter = "none";
+    // 白い尾根：雪の下限から、林の中へ舌のようにのびる（頂の下のまん中に一本、大きく）
+    for (const [px0, len, w] of [[168, 20, 3], [203, 24, 3.5], [238, 22, 3.5], [272, 26, 3.5], [308, 16, 3], [397, 58, 9]]) {
+      const [xs] = PW(px0, 0), ys = snowY(xs) - (w > 6 ? 18 : 6), th = (6 + r() * 10) * Math.PI / 180;
+      const C = flow(xs, ys, th, (px, py) => py > ys + len * 0.95, w * 0.82, 0.2); C.forEach((c, j) => { const u = j / Math.max(1, C.length - 1); c[2] = 0.3 + w * 0.9 * Math.pow(1 - u, 0.7); });
+      x.filter = "blur(0.8px)"; band(C, "214,224,246", 0.6, 0.12, 0); x.filter = "none";
+    }
+    // すそ：雪の林がだんだん濃く。ところどころに白い雪原
+    const tg = x.createLinearGradient(0, 556, 0, 606); tg.addColorStop(0, "rgba(20,28,54,0)"); tg.addColorStop(1, "rgba(20,28,54,0.45)"); x.fillStyle = tg; x.fillRect(X0, 556, X1 - X0, 60);
+    for (let i = 0; i < 320; i++) { const px = X0 + r() * (X1 - X0), py = 540 + r() * 66; if (py < snowY(px) + 10) continue; x.fillStyle = `rgba(16,22,42,${(0.08 + 0.16 * r()).toFixed(3)})`; x.fillRect(px, py, 0.9 + r() * 0.7, 0.9 + r() * 1.1); }
+    for (const [a, b, py] of [[130, 180, 414], [215, 255, 413], [262, 296, 412], [305, 375, 417], [372, 430, 423], [480, 530, 420], [560, 600, 418]]) {
+      const [x0, y0] = PW(a, py), [x1] = PW(b, py), cx = (x0 + x1) / 2, rx = (x1 - x0) / 2;
+      x.save(); x.translate(cx, y0); x.scale(1, 0.08); const pg = x.createRadialGradient(0, 0, 0, 0, 0, rx); pg.addColorStop(0, "rgba(206,218,244,0.5)"); pg.addColorStop(0.7, "rgba(206,218,244,0.3)"); pg.addColorStop(1, "rgba(206,218,244,0)"); x.fillStyle = pg; x.fillRect(-rx, -rx, rx * 2, rx * 2); x.restore();
+    }
+    x.restore();
+    // 稜線：左は空の光を受けて白く、右は淡く
+    const eg = x.createLinearGradient(0, 0, 520, 0); eg.addColorStop(0, "rgba(222,232,252,0.5)"); eg.addColorStop(0.6, "rgba(214,226,250,0.42)"); eg.addColorStop(1, "rgba(150,166,206,0.14)");
+    x.strokeStyle = eg; x.lineWidth = 0.9; x.beginPath(); MTN.forEach((p, i) => i ? x.lineTo(p[0], p[1]) : x.moveTo(p[0], p[1])); x.stroke();
+  }
+  function drawMagari(x) {   // 南部の曲り家：寄棟のかや屋根の母屋と、手前へ突き出た馬屋。屋根に雪
+    const poly = (pts, fill) => { x.beginPath(); pts.forEach((p, i) => { const [px, py] = MP(p[0], p[1]); if (i) x.lineTo(px, py); else x.moveTo(px, py); }); x.closePath(); x.fillStyle = fill; x.fill(); };
+    poly([[-44, -12], [30, -12], [30, 0], [-44, 0]], "rgb(16,18,30)");             // 母屋の壁
+    poly([[-8, -10], [0, -10], [0, 0], [-8, 0]], "rgb(30,26,28)");                  // 戸口
+    poly([[-52, -10], [-29, -46], [15, -46], [38, -10]], "rgb(206,216,238)");       // 寄棟の屋根の雪
+    poly([[15, -46], [38, -10], [27, -10], [10, -40]], "rgba(150,164,198,0.6)");   // 東の妻はかげる
+    poly([[-52, -10], [38, -10], [37, -7], [-51, -7]], "rgb(44,40,44)");           // 軒のかやの切り口
+    poly([[-10, -46], [-4, -54], [2, -46]], "rgb(214,222,242)"); poly([[-9, -46], [1, -46], [1, -44.5], [-9, -44.5]], "rgb(34,32,38)");   // 煙出し
+    poly([[14, -8], [46, -8], [46, 5], [14, 5]], "rgb(14,16,26)");                 // 馬屋の壁
+    poly([[8, -6], [30, -38], [52, -6]], "rgb(200,212,236)");                      // 馬屋の屋根の雪（妻を見せる）
+    poly([[13, -8], [30, -31], [47, -8]], "rgb(22,22,30)");                        // 妻壁
+    poly([[8, -6], [52, -6], [51, -4], [9, -4]], "rgb(44,40,44)");
+    poly([[26, -2], [34, -2], [34, 5], [26, 5]], "rgb(30,26,28)");                 // 馬屋の戸
+  }
+  function drawLand(x) {
+    const r = mulberry(733);
+    drawMountain(x);
+    // ふもとの林
+    x.fillStyle = "rgb(16,22,38)"; x.fillRect(-10, HZ - 8, W + 20, 26);
+    for (let i = 0; i < 90; i++) { const px = r() * W, h = 6 + r() * 16; x.beginPath(); x.moveTo(px - 4, HZ + 4); x.lineTo(px - 1, HZ - h * 0.6); x.lineTo(px, HZ - h); x.lineTo(px + 1, HZ - h * 0.6); x.lineTo(px + 4, HZ + 4); x.closePath(); x.fill(); }
+    const mg = x.createLinearGradient(0, HZ - 24, 0, HZ + 8); mg.addColorStop(0, "rgba(150,166,210,0)"); mg.addColorStop(0.55, "rgba(150,166,210,0.16)"); mg.addColorStop(1, "rgba(150,166,210,0)"); x.fillStyle = mg; x.fillRect(-10, HZ - 24, W + 20, 32);   // すその夜霧
+    // 雪の野：奥はあかるく、手前は青く沈む
+    const fg = x.createLinearGradient(0, HZ + 10, 0, H); fg.addColorStop(0, "rgb(118,134,174)"); fg.addColorStop(0.35, "rgb(88,104,148)"); fg.addColorStop(1, "rgb(48,58,94)"); x.fillStyle = fg; x.fillRect(-10, HZ + 10, W + 20, H - HZ);
+    for (let i = 0; i < 40; i++) { const px = r() * W, py = HZ + 20 + Math.pow(r(), 1.4) * (H - HZ - 40), rx = 30 + r() * 120 * (py - HZ) / 300, ry = rx * 0.12, gr = x.createRadialGradient(px, py - ry * 0.4, 0, px, py, rx); gr.addColorStop(0, `rgba(170,186,224,${(0.12 + 0.1 * r()).toFixed(3)})`); gr.addColorStop(1, "rgba(170,186,224,0)"); x.fillStyle = gr; x.beginPath(); x.ellipse(px, py, rx, ry, 0, 0, 6.2832); x.fill(); }   // 吹きだまり
+    for (let i = 0; i < 9; i++) { const y = HZ + 18 + Math.pow(i / 9, 1.8) * (H - HZ - 30); x.strokeStyle = `rgba(36,46,80,${(0.18 + 0.1 * r()).toFixed(3)})`; x.lineWidth = 0.8 + i * 0.12; x.beginPath(); x.moveTo(-10, y + r() * 6); x.bezierCurveTo(140, y - 6 - r() * 6, 330, y + 6 + r() * 4, W + 10, y - 4); x.stroke(); }   // あぜ
+    for (let i = 0; i < 700; i++) { const px = r() * W, py = HZ + 14 + r() * (H - HZ); x.fillStyle = `rgba(214,224,246,${(0.04 + 0.08 * r()).toFixed(3)})`; x.fillRect(px, py, 1, 1); }   // 雪の粒
+    // 村へ続く雪の道（そりの跡）
+    x.strokeStyle = "rgba(40,50,86,0.55)"; x.lineWidth = 16; x.beginPath(); x.moveTo(150, H + 10); x.bezierCurveTo(200, 860, 120, 770, 230, 712); x.bezierCurveTo(290, 682, 320, 676, 336, 668); x.stroke();
+    x.strokeStyle = "rgba(150,166,206,0.35)"; x.lineWidth = 1.2; for (const o of [-5, 5]) { x.beginPath(); x.moveTo(150 + o, H + 10); x.bezierCurveTo(200 + o, 860, 120 + o * 0.8, 770, 230 + o * 0.6, 712); x.bezierCurveTo(290 + o * 0.4, 682, 320 + o * 0.3, 676, 336, 668); x.stroke(); }
+    for (const [px, py, h] of [[206, 742, 12], [250, 710, 9], [282, 699, 8], [310, 688, 7]]) { const w = h * 0.18; x.fillStyle = "rgb(22,24,36)"; x.fillRect(px - w / 2, py - h, w, h); x.fillStyle = "rgba(214,224,246,0.85)"; x.fillRect(px - w / 2 - 0.4, py - h - 1, w + 0.8, 1.3); }   // 道ばたの杭
+    for (const [tx, ty, th, sd] of TREES) treeStrokes(x, tx, ty, th, sd, "rgba(16,20,34,0.9)");
+    // 遠くの家
+    { const hx = 60, hy = 652, s = 0.55; x.fillStyle = "rgb(20,24,38)"; x.fillRect(hx - 22 * s, hy - 14 * s, 44 * s, 18 * s); x.fillStyle = "rgb(196,208,232)"; x.beginPath(); x.moveTo(hx - 30 * s, hy - 12 * s); x.lineTo(hx, hy - 40 * s); x.lineTo(hx + 30 * s, hy - 12 * s); x.closePath(); x.fill(); x.strokeStyle = "rgba(20,24,38,0.8)"; x.lineWidth = 1; x.stroke(); }
+    // 右の杉林：枝の段がぎざぎざに重なる。枝に雪（字の下を暗く）
+    for (const c of CEDARS) {
+      const { px, h, by } = c;
+      x.fillStyle = "rgb(10,14,26)"; x.beginPath(); x.moveTo(px, by - h);
+      for (let k = 1; k <= 7; k++) { const y = by - h + h * k / 7, w = 4 + 14 * k / 7; x.lineTo(px + w, y - 2); x.lineTo(px + w * 0.45, y - h / 14); }
+      for (let k = 7; k >= 1; k--) { const y = by - h + h * k / 7, w = 4 + 14 * k / 7; x.lineTo(px - w * 0.45, y - h / 14); x.lineTo(px - w, y - 2); }
+      x.closePath(); x.fill();
+      x.strokeStyle = "rgba(170,186,224,0.35)"; x.lineWidth = 1; for (let k = 2; k <= 7; k++) { const y = by - h + h * k / 7, w = 4 + 14 * k / 7; x.beginPath(); x.moveTo(px - w * 0.8, y - 4); x.lineTo(px - w * 0.2, y - h / 14 - 1); x.stroke(); }
+    }
+    x.fillStyle = "rgb(10,14,26)"; x.fillRect(420, 766, 140, 220);
+    drawMagari(x);
+  }
+  function wirePts(a, b, k) {   // 柱 a から b への一本の電線（たるむ）
+    const ya = a.top + 4 + k * a.h * 0.05, yb = b.top + 4 + k * b.h * 0.05, xa = a.x + (k ? a.arm : -a.arm) * 0.8, xb = b.x + (k ? b.arm : -b.arm) * 0.8;
+    return [xa, ya, (xa + xb) / 2, (ya + yb) / 2 + 0.06 * Math.hypot(xb - xa, yb - ya), xb, yb];
+  }
+  function drawPoles(x) {
+    for (let i = 0; i < POLES.length - 1; i++) for (const k of [0, 1]) { const [x0, y0, cx, cy, x1, y1] = wirePts(POLES[i], POLES[i + 1], k); x.strokeStyle = "rgba(12,14,24,0.85)"; x.lineWidth = Math.max(0.5, POLES[i].h / 260); x.beginPath(); x.moveTo(x0, y0); x.quadraticCurveTo(cx, cy, x1, y1); x.stroke(); }
+    for (const p of POLES) {
+      const w = Math.max(1.2, p.h / 34); x.fillStyle = "rgb(12,14,24)"; x.fillRect(p.x - w / 2, p.top, w, p.h);
+      x.fillRect(p.x - p.arm, p.top + 3, p.arm * 2, Math.max(1, w * 0.6));   // 腕木
+      x.fillStyle = "rgba(206,216,238,0.7)"; x.fillRect(p.x - p.arm, p.top + 2.3, p.arm * 2, Math.max(0.5, w * 0.25));   // 腕木の雪
+      x.fillStyle = "rgba(200,212,236,0.9)"; for (const s of [-0.8, -0.4, 0.4, 0.8]) { x.beginPath(); x.arc(p.x + p.arm * s, p.top + 1.5, Math.max(0.7, w * 0.35), 0, 6.2832); x.fill(); }   // がいし
+      x.fillStyle = "rgba(200,212,236,0.7)"; x.fillRect(p.x - w / 2, p.top - 1.2, w, 1.4);   // 柱の頭の雪
+    }
+    const p = POLES[1]; x.fillStyle = "rgb(12,14,24)"; x.fillRect(p.x, p.top + 18, p.arm * 0.9 + 7, 2.4);   // 電燈の腕
+  }
+
+  /* ---- 動く物 ---- */
+  function glow(x, px, py, r, c, a) { if (a <= 0.003) return; const g = x.createRadialGradient(px, py, 0, px, py, r); g.addColorStop(0, col(c, a)); g.addColorStop(0.3, col(c, a * 0.35)); g.addColorStop(1, col(c, 0)); x.fillStyle = g; x.fillRect(px - r, py - r, r * 2, r * 2); }
+  function stars(x, t, rt, M) {
+    const fk = flickK(t), pa = pulseAt(t), cw = x.canvas.width, ch = x.canvas.height, wave = t > STAR - 0.6 && t < STAR + 4;
+    const at = (wx, wy) => { const sx = M[0] * wx + M[4], sy = M[3] * wy + M[5]; return [sx, sy, 1 - 0.45 * ss(cw * 0.5, cw * 0.62, sx) * (1 - ss(ch * 0.5, ch * 0.62, sy))]; };   // 字の後ろは淡く
+    for (const s of STARS) {
+      const [sx, sy, dim] = at(s.x, s.y); if (sx < -6 || sx > cw + 6 || sy < -6 || sy > ch + 6) continue;
+      let a = (0.45 + 0.55 * (0.6 + 0.4 * Math.sin(rt * s.sp + s.ph))) * (1 - 0.55 * fk * pa) * dim, rr = s.r;
+      if (wave) { const w = Math.exp(-Math.pow((t - STAR - 0.25 - Math.hypot(s.x - FX, s.y - FY) / 420) / 0.16, 2)); a = Math.min(1, a + 0.8 * w); rr *= 1 + 0.9 * w; }   // 新しい星から、順にまたたく
+      x.fillStyle = s.tint < 0.15 ? `rgba(255,224,190,${a.toFixed(3)})` : `rgba(220,230,255,${a.toFixed(3)})`; x.beginPath(); x.arc(s.x, s.y, rr, 0, 6.2832); x.fill();
+    }
+    for (const [ox, oy, orr] of ORION) { const dim = at(ox, oy)[2]; x.fillStyle = `rgba(235,240,255,${(0.5 * dim * (1 - 0.5 * fk * pa)).toFixed(3)})`; x.beginPath(); x.arc(ox, oy, orr, 0, 6.2832); x.fill(); }
+  }
+  function lights(x, t, rt) {
+    const fk = flickK(t), pa = pulseAt(t), lost = lostK(t);
+    for (const l of LIGHTS) {
+      const base = l.lamp ? 0.85 * (1 - lost) : 0.9 * (1 - 0.6 * lost), fl = 1 - 0.75 * fk * pa * l.k, a = base * fl * (0.92 + 0.08 * Math.sin(rt * 3 + l.ph));
+      if (l.lamp) { glow(x, l.x, l.y, 16 * l.r, WARM, 0.35 * a); x.fillStyle = col([255, 230, 170], a); x.beginPath(); x.arc(l.x, l.y, l.r, 0, 6.2832); x.fill(); }
+      else { glow(x, l.x, l.y, 9 * l.r, WARM, 0.28 * a); x.fillStyle = col(WARM, a); x.fillRect(l.x - l.r, l.y - l.r * 0.8, l.r * 2, l.r * 1.6); }
+    }
+  }
+  function smoke(x, t) {   // 曲り家の煙出しから、炉の煙
+    const [vx, vy] = MP(-4, -54), lo = 1 - 0.6 * lostK(t);
+    for (let i = 0; i < 7; i++) {
+      const u = (t * 0.07 + i / 7) % 1, px = vx - 34 * u * u + 3 * Math.sin(u * 7 + i), py = vy - 80 * u, rr = 2.5 + 13 * u, a = 0.09 * Math.sin(Math.PI * u) * lo;
+      if (a < 0.004) continue;
+      const gr = x.createRadialGradient(px, py, 0, px, py, rr); gr.addColorStop(0, `rgba(150,160,186,${a.toFixed(3)})`); gr.addColorStop(1, "rgba(150,160,186,0)"); x.fillStyle = gr; x.fillRect(px - rr, py - rr, rr * 2, rr * 2);
+    }
+  }
+  function network(x, t) {
+    const k = netK(t); if (k <= 0.01) return;
+    for (const n of NET) {
+      const d = t - n.t0; if (d < 0) continue;
+      const seg = d * n.sp * 1.6, i = Math.floor(seg), f = seg - i, idx = n.dir > 0 ? n.a + i : n.a - i;
+      if (idx < 0 || idx >= POLES.length - 1) continue;
+      const [x0, y0, cx, cy, x1, y1] = wirePts(POLES[idx], POLES[idx + 1], n.w), u = n.dir > 0 ? f : 1 - f;
+      const px = (1 - u) * (1 - u) * x0 + 2 * u * (1 - u) * cx + u * u * x1, py = (1 - u) * (1 - u) * y0 + 2 * u * (1 - u) * cy + u * u * y1, s = Math.max(0.6, POLES[idx].h / 120);
+      glow(x, px, py, 10 * s, [180, 210, 255], 0.75 * k); x.fillStyle = `rgba(235,245,255,${(0.9 * k).toFixed(3)})`; x.beginPath(); x.arc(px, py, 1.4 * s, 0, 6.2832); x.fill();
+    }
+  }
+  function glints(x, t, rt) { const lo = 1 - lostK(t) * 0.5; for (const g of GLINT) { const a = Math.pow(Math.max(0, Math.sin(rt * g.sp + g.ph)), 12) * 0.8 * lo; if (a < 0.03) continue; x.fillStyle = `rgba(230,240,255,${a.toFixed(3)})`; x.fillRect(g.x - 0.6, g.y - 0.6, 1.2, 1.2); x.fillRect(g.x - 2, g.y - 0.2, 4, 0.4); } }
+  // 点の列を、角を丸めた閉じた形に
+  function smoothPath(x, P) {
+    const n = P.length, mid = (a, b) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2], m = mid(P[n - 1], P[0]);
+    x.moveTo(m[0], m[1]); for (let i = 0; i < n; i++) { const q = mid(P[i], P[(i + 1) % n]); x.quadraticCurveTo(P[i][0], P[i][1], q[0], q[1]); } x.closePath();
+  }
+  // 南部の馬・狐・兎：光のほうへ（左を向く）
+  const HORSE = [[-30, -16], [-34, -14], [-39, -6], [-41, 6], [-38, 16], [-35, 8], [-33, -2], [-31, -4], [-30, 6], [-28, 12], [-29, 26], [-23, 26], [-23, 16], [-21, 6], [-19, 4], [-18, 14], [-19, 26], [-13, 26], [-13, 14], [-12, 2], [-4, 1], [8, 1],
+    [11, 2], [12, 14], [12, 26], [17, 26], [17, 14], [17, 3], [19, 3], [20, 14], [20, 26], [25, 26], [24, 12], [25, -2], [27, -10], [30, -20], [35, -28], [42, -27], [47, -30], [47, -35], [41, -42], [36, -48],
+    [35, -54], [32, -49], [30, -53], [29, -47], [24, -40], [18, -30], [12, -24], [6, -24], [-8, -21], [-22, -20]].map(([a, b]) => [-a, b - 4]);
+  const FOX = [[-22, -6], [-30, -12], [-40, -16], [-47, -12], [-44, -4], [-34, 0], [-25, 1], [-22, 6], [-21, 16], [-22, 22], [-17, 22], [-16, 12], [-13, 6], [-4, 8], [8, 8], [10, 10], [11, 16], [10, 22], [15, 22], [15, 13], [17, 5], [20, 0], [23, -6], [31, -8], [37, -8], [35, -12], [27, -15],
+    [25, -21], [23, -27], [20, -20], [17, -25], [15, -18], [10, -12], [0, -10], [-12, -9]].map(([a, b]) => [-a, b]);
+  const HARE = [[-17, 22], [-21, 14], [-20, 4], [-14, -4], [-4, -8], [5, -10], [7, -14], [4, -32], [8, -33], [11, -16], [13, -32], [17, -31], [15, -14], [20, -11], [23, -6], [19, -3], [14, 3], [14, 13], [18, 22], [8, 22], [-4, 22]].map(([a, b]) => [-a, b]);
+  const HEM = [[19, 6], [15, 2], [12, 8], [8, 3], [4, 9], [0, 4], [-4, 9], [-8, 3], [-12, 8], [-15, 2], [-19, 6]];   // 蓑のすそ（わらのぎざぎざ）
+  function ghostShape(x, k, f) {
+    x.beginPath();
+    if (k === "man") {   // 蓑と笠の人
+      x.moveTo(-22, -47); x.quadraticCurveTo(-6, -62, 0, -63); x.quadraticCurveTo(6, -62, 22, -47); x.quadraticCurveTo(0, -51, -22, -47); x.closePath();
+      x.moveTo(7, -43); x.arc(0, -43, 7, 0, 6.2832);
+      x.moveTo(-8, -37); x.lineTo(8, -37); x.lineTo(17, -12); for (const p of HEM) x.lineTo(p[0], p[1]); x.lineTo(-17, -12); x.closePath();
+      x.rect(-7, 6, 5, 16); x.rect(2, 6, 5, 16);
+    } else if (k === "woman") {   // 角巻をかぶった人
+      x.moveTo(0, -60); x.quadraticCurveTo(14, -60, 14, -46); x.quadraticCurveTo(15, -24, 21, 2); x.quadraticCurveTo(0, 7, -21, 2); x.quadraticCurveTo(-15, -24, -14, -46); x.quadraticCurveTo(-14, -60, 0, -60); x.closePath();
+      x.moveTo(5.5, -45); x.arc(0, -45, 5.5, 0, 6.2832);
+      x.moveTo(-9, 3); x.lineTo(-8, 22); x.lineTo(-2, 22); x.lineTo(-1, 6); x.lineTo(1, 6); x.lineTo(2, 22); x.lineTo(8, 22); x.lineTo(9, 3); x.closePath();
+    } else if (k === "child") {   // 綿入れの子ども。光へ手をのばす
+      x.moveTo(7.5, -32); x.arc(0, -32, 7.5, 0, 6.2832);
+      x.moveTo(-8, -24); x.quadraticCurveTo(-15, -8, -13, 6); x.lineTo(13, 6); x.quadraticCurveTo(15, -8, 8, -24); x.closePath();
+      x.moveTo(9, -19); x.lineTo(18, -36); x.lineTo(21.5, -34); x.lineTo(13, -15); x.closePath();
+      x.rect(-6, 6, 4.5, 16); x.rect(1.5, 6, 4.5, 16);
+    } else if (k === "horse") smoothPath(x, HORSE);
+    else if (k === "fox") smoothPath(x, FOX);
+    else if (k === "hare") smoothPath(x, HARE);
+    else if (k === "bird") {   // はばたく
+      const w = 8 * Math.sin(f);
+      x.moveTo(-24, -4 - w); x.quadraticCurveTo(-10, -16 - w * 0.5, 0, -6); x.quadraticCurveTo(10, -16 - w * 0.5, 24, -4 - w); x.quadraticCurveTo(10, -8, 0, 0); x.quadraticCurveTo(-10, -8, -24, -4 - w); x.closePath();
+    } else {   // 杉
+      const N = 6, yk = i => -70 + 78 * i / N, wk = i => 3 + 16 * i / N;
+      x.moveTo(0, -70);
+      for (let i = 1; i <= N; i++) { x.lineTo(wk(i), yk(i)); if (i < N) x.lineTo(wk(i) * 0.4, yk(i) - 3); }
+      x.lineTo(3, 8); x.lineTo(3, 22); x.lineTo(-3, 22); x.lineTo(-3, 8);
+      for (let i = N; i >= 1; i--) { x.lineTo(-wk(i), yk(i)); if (i > 1) x.lineTo(-wk(i - 1) * 0.4, yk(i - 1) - 3); }
+      x.closePath();
+    }
+  }
+  function drawGhost(x, g, px, py, sc, a, rt) {   // (px, py) が足もと
+    if (a <= 0.005) return;
+    if (g.k === "star") { x.save(); x.globalCompositeOperation = "lighter"; glow(x, px, py, 14, [170, 205, 255], 0.5 * a); glow(x, px, py, 4, [230, 240, 255], 0.9 * a); x.restore(); return; }
+    x.save(); x.translate(px, py); x.scale(sc, sc); x.translate(0, -22);
+    x.save(); x.globalCompositeOperation = "lighter"; glow(x, 0, -18, 50, [120, 170, 255], 0.12 * a); x.restore();
+    if (g.k === "tree") treeStrokes(x, 0, 22, g.h, g.seed, `rgba(205,228,255,${(0.55 * a).toFixed(3)})`);
+    else {
+      ghostShape(x, g.k, rt * 7 + g.ph);
+      const gr = x.createLinearGradient(0, -60, 0, 24); gr.addColorStop(0, `rgba(200,225,255,${(0.28 * a).toFixed(3)})`); gr.addColorStop(1, `rgba(140,180,255,${(0.08 * a).toFixed(3)})`); x.fillStyle = gr; x.fill();
+      x.strokeStyle = `rgba(220,236,255,${(0.55 * a).toFixed(3)})`; x.lineWidth = 1.2 / sc; x.stroke();
+    }
+    x.restore();
+  }
+  function ghosts(x, t, rt) {
+    for (const g of GH) {
+      const t0 = g.tm - g.dur - 0.6; if (t < t0 || t > g.tm + 0.05) continue;
+      const fin = ss(t0, t0 + 0.6, t), u = sm(clamp((t - t0 - 0.6) / g.dur, 0, 1));
+      const sx = g.f[0], sy = g.f[1] - 5 * fin, ex = LP.x, ey = LP.y, sky = g.k === "star" || g.k === "bird";
+      const qx = (sx + ex) / 2 + g.bend, qy = sky ? (sy + ey) / 2 + 30 : Math.min(sy, ey) - g.lift;   // 野のものは、ふわりと持ちあがる弧で
+      const px = (1 - u) * (1 - u) * sx + 2 * u * (1 - u) * qx + u * u * ex + Math.sin(rt * 0.9 + g.ph) * 4 * (1 - u), py = (1 - u) * (1 - u) * sy + 2 * u * (1 - u) * qy + u * u * ey + Math.sin(rt * 1.2 + g.ph) * 3 * (1 - u);
+      const sc = (g.s0 === undefined ? 1 : lerp(g.s0, g.s1, sm(Math.min(1, u / 0.6)))) * (1 - 0.9 * ss(0.6, 1, u));
+      drawGhost(x, g, px, py, Math.max(0.02, sc), fin * (1 - ss(0.85, 1, u)), rt);
+    }
+  }
+  function echoes(x, t, rt) {   // 明滅の暗い拍に、幽霊たちの輪郭が、もとの場所に透ける（風景やみんなといつしよに）
+    const k = flickK(t) * pulseAt(t); if (k < 0.04) return;
+    for (const g of GH) if (g.k !== "star" && g.k !== "bird") drawGhost(x, g, g.f[0], g.f[1], g.s0, 0.45 * k, rt);
+  }
+  function web(x, t, rt) {   // 因果の糸：窓・木・山・星のあいだに光の糸が張られ、二度めの「青」で結び目の光が電燈に集まる
+    const k0 = ss(L(7).t - 0.4, L(7).t + 0.3, t) * (1 - ss(IGN2 - 0.1, L(8).end, t));
+    const bez = (A, B, u) => { const mx = (A[0] + B[0]) / 2, my = (A[1] + B[1]) / 2 + 0.06 * Math.hypot(B[0] - A[0], B[1] - A[1]); return [(1 - u) * (1 - u) * A[0] + 2 * u * (1 - u) * mx + u * u * B[0], (1 - u) * (1 - u) * A[1] + 2 * u * (1 - u) * my + u * u * B[1]]; };
+    if (k0 > 0.01) {
+      x.save(); x.globalCompositeOperation = "lighter"; x.lineWidth = 0.8;   // 雪の上でも見えるよう、光を足して描く
+      for (const e of EDGES) {
+        const gr = ss(e.t0, e.t0 + 0.6, t); if (gr <= 0) continue;
+        const A = NODES[e.a], B = NODES[e.b];
+        x.strokeStyle = `rgba(160,200,255,${(k0 * (0.2 + 0.08 * Math.sin(rt * 2 + e.ph))).toFixed(3)})`;
+        x.beginPath(); x.moveTo(A[0], A[1]); for (let i = 1; i <= 14; i++) { const p = bez(A, B, gr * i / 14); x.lineTo(p[0], p[1]); } x.stroke();
+        if (gr >= 1) { const p = bez(A, B, 0.5 + 0.5 * Math.sin(rt * e.sp + e.ph)); glow(x, p[0], p[1], 7, [190, 220, 255], 0.55 * k0); }
+      }
+      for (let i = 1; i < NODES.length; i++) glow(x, NODES[i][0], NODES[i][1], 6, [190, 220, 255], 0.35 * k0);
+      x.restore();
+    }
+    const c0 = L(8).t - 0.1;
+    if (t > c0 && t < IGN2 + 0.1) for (let i = 1; i < NODES.length; i++) {
+      const ta = lerp(L(8).times[1], IGN2, (i % 7) / 6), u = sm(clamp((t - c0) / (ta - c0), 0, 1)); if (u >= 1) continue;
+      const px = lerp(NODES[i][0], LP.x, u), py = lerp(NODES[i][1], LP.y, u) - Math.sin(Math.PI * u) * 20;
+      glow(x, px, py, 8, [190, 220, 255], 0.8 * (1 - 0.3 * u));
+    }
+  }
+  function pool(x, t, rt) {   // 電燈の下：雪の空気にうっすら光の円錐、雪の上に光だまり
+    const ig = ignite(t), lost = lostK(t); if (ig <= 0.01 || lost >= 0.99) return;
+    const k = ig * (1 - 0.28 * flickK(t) * pulseAt(t)) * (1 - lost) * (1 + 0.3 * bloomAt(t));
+    x.save(); x.globalCompositeOperation = "lighter";
+    const gy0 = LP.y + 6, gy1 = 806, gr = x.createLinearGradient(0, gy0, 0, gy1); gr.addColorStop(0, col([120, 170, 255], 0.1 * k)); gr.addColorStop(1, col([120, 170, 255], 0));
+    x.fillStyle = gr; x.beginPath(); x.moveTo(LP.x - 7, gy0); x.lineTo(LP.x + 7, gy0); x.lineTo(LP.x + 78, gy1); x.lineTo(LP.x - 78, gy1); x.closePath(); x.fill();
+    x.save(); x.translate(LP.x, 808); x.scale(1, 0.2); glow(x, 0, 0, 92, [120, 170, 255], 0.32 * k); x.restore();
+    x.restore();
+  }
+  // 仮定された有機交流電燈：輪郭だけの笠と電球、なかに植物のつるのようなフィラメント
+  function lamp(x, t, rt) {
+    const d = lampDraw(t), ig = ignite(t), lost = lostK(t); if (d <= 0.01 || lost >= 0.999) return;
+    const lx = LAMP.x, ly = LAMP.y, a = (1 - lost) * 0.55;
+    x.save(); x.setLineDash([200 * d, 400]); x.lineWidth = 1.2;
+    x.strokeStyle = `rgba(190,215,255,${a.toFixed(3)})`;
+    x.beginPath(); x.moveTo(lx, ly - 18); x.lineTo(lx, ly - 10); x.moveTo(lx - 16, ly + 2); x.lineTo(lx, ly - 10); x.lineTo(lx + 16, ly + 2); x.closePath(); x.stroke();   // 笠
+    x.beginPath(); x.arc(lx, ly + 9, 7.5, 0, 6.2832); x.stroke();   // 電球
+    x.restore();
+    const fa = (1 - lost) * (0.35 + 0.65 * ig) * d;
+    x.strokeStyle = `rgba(${Math.round(lerp(190, 230, ig))},${Math.round(lerp(215, 245, ig))},255,${fa.toFixed(3)})`; x.lineWidth = 0.9;
+    x.beginPath(); for (let i = 0; i <= 30; i++) { const u = i / 30, px = lx - 4 + u * 8 + Math.sin(u * 14 + rt * 0.5) * 1.6, py = ly + 6 + Math.cos(u * 14 + rt * 0.5) * 2.2 - Math.sin(u * 3.14) * 2; if (i) x.lineTo(px, py); else x.moveTo(px, py); } x.stroke();
+  }
+  function lightPos(t, rt) { const e = riseK(t); return [lerp(LP.x, FX, e) + 10 * Math.sin(rt * 0.5) * e * (1 - e) * 4, lerp(LP.y, FY, e)]; }
+  function snow(x, t, rt) {   // 降る雪。青い光の近くでは青く光る
+    const [bx, by] = lightPos(t, rt), lk = ignite(t) * (1 - 0.6 * lostK(t)) * (1 - 0.28 * flickK(t) * pulseAt(t)) * starFade(t), span = H - TOP;
+    for (const f of SNOW) {
+      const sp = 10 + 38 * f.z, yy = TOP + ((f.y * span + sp * t) % span), xx = ((f.x + Math.sin(t * 0.5 + f.ph) * (5 + 9 * f.z) - t * (2 + 5 * f.z)) % W + W) % W, rr = 0.45 + 1.5 * f.z;
+      const d2 = (xx - bx) * (xx - bx) + (yy - by) * (yy - by), lit = lk * Math.exp(-d2 / (2 * 85 * 85)), a = Math.min(1, 0.22 + 0.45 * f.z + 0.7 * lit);
+      x.fillStyle = lit > 0.04 ? `rgba(${Math.round(lerp(214, 150, lit))},${Math.round(lerp(224, 200, lit))},255,${a.toFixed(3)})` : `rgba(214,224,246,${a.toFixed(3)})`;
+      x.beginPath(); x.arc(xx, yy, rr * (1 + 0.6 * lit), 0, 6.2832); x.fill();
+    }
+  }
+  // 青い光：明滅の拍でもうすくなりきらずに、ともりつづける。幽霊がとけこむたびにふくらみ、最後は空へのぼって星になる
+  function blueLight(x, t, rt) {
+    const ig = ignite(t); if (ig <= 0.01) return;
+    const lost = lostK(t), fk = flickK(t), pa = pulseAt(t), st = ss(STAR - 1.2, STAR + 0.4, t), [bx, by] = lightPos(t, rt);
+    const fl = 1 - 0.28 * fk * pa + 0.05 * Math.sin(rt * 23) * fk, f2 = t > IGN2 ? Math.exp(-(t - IGN2) / 0.35) : 0, comp = 1 + 0.15 * mergedAt(t);
+    const k = ig * fl * (1 + 0.45 * bloomAt(t) + 0.6 * f2) * starFade(t), R1 = 120 * comp * (1 + 0.35 * lost) * (1 - 0.6 * st), R2 = 40 * comp * (1 + 0.2 * lost) * (1 - 0.45 * st);
+    x.save(); x.globalCompositeOperation = "lighter";
+    glow(x, bx, by, R1, [60, 110, 255], 0.34 * k); glow(x, bx, by, R2, BLUE, 0.62 * k); glow(x, bx, by, 9, [220, 236, 255], Math.min(1, 0.95 * k));
+    if (st > 0.01) {   // 星のまたたき：細い十字の光
+      const tw = 0.75 + 0.25 * Math.sin(rt * 5.3) * Math.sin(rt * 2.1 + 1), ls = 26 * st * tw;
+      x.strokeStyle = `rgba(200,225,255,${Math.min(1, 0.6 * st * k).toFixed(3)})`; x.lineWidth = 0.8;
+      x.beginPath(); x.moveTo(bx - ls, by); x.lineTo(bx + ls, by); x.moveTo(bx, by - ls); x.lineTo(bx, by + ls); x.stroke();
+    }
+    x.restore();
+  }
+
+  /* ---- 幻燈の味 ---- */
+  const DUST = Array.from({ length: 22 }, () => ({ x: rnd(0, W), y: rnd(0, H), r: rnd(0.6, 2.2), dark: rnd() < 0.6, hair: rnd() < 0.25, a: rnd(0, 6.28) }));
+  let built = false, SKY, LAND, LANDD, POLE, VIG, WASH;
+  function build() {
+    SKY = layer(drawSky, TOP, HZ + 10 - TOP); LAND = layer(drawLand); POLE = layer(drawPoles);
+    LANDD = mk(LAND.width, LAND.height); { const y = LANDD.getContext("2d"); y.drawImage(LAND, 0, 0); y.globalCompositeOperation = "source-in"; y.fillStyle = "rgb(3,5,12)"; y.fillRect(0, 0, LANDD.width, LANDD.height); } LANDD.y0 = 0; LANDD.hh = H;   // 野の影絵（透かさずに沈めるのに使う）
+    VIG = mk(W, H); { const y = VIG.getContext("2d"), gr = y.createRadialGradient(W / 2, H * 0.47, H * 0.22, W / 2, H * 0.47, H * 0.72); gr.addColorStop(0, "rgba(0,0,0,0)"); gr.addColorStop(0.75, "rgba(4,4,10,0.45)"); gr.addColorStop(1, "rgba(2,2,6,0.92)"); y.fillStyle = gr; y.fillRect(0, 0, W, H); }
+    WASH = mk(W, H); { const y = WASH.getContext("2d"), r = mulberry(4242); for (let i = 0; i < 16; i++) { const px = r() * W, py = r() * H, rr = 120 + r() * 260, c = r() < 0.5 ? "255,214,170" : "170,196,255", gr = y.createRadialGradient(px, py, 0, px, py, rr); gr.addColorStop(0, `rgba(${c},0.1)`); gr.addColorStop(1, `rgba(${c},0)`); y.fillStyle = gr; y.fillRect(0, 0, W, H); } }   // 手で色をさしたガラスのむら
+  }
+  function render(g, S2, t, rt) {
+    if (!built) { build(); built = true; }
+    const cw = g.canvas.width, ch = g.canvas.height, [cx, cy, z] = cam(t), sc = S2 * z, wv = mulberry(4000 + Math.floor(rt * 8));
+    const M = [sc, 0, 0, sc, S2 * W / 2 - sc * cx + (wv() - 0.5) * 0.9, S2 * H / 2 - sc * cy + (wv() - 0.5) * 0.9];   // 幻燈のわずかな揺れ
+    g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = 1; g.globalCompositeOperation = "source-over"; g.imageSmoothingEnabled = true; g.imageSmoothingQuality = "high";
+    g.fillStyle = "#000"; g.fillRect(0, 0, cw, ch);
+    const lost = lostK(t);
+    g.setTransform(...M); g.lineCap = "round"; g.lineJoin = "round";
+    put(g, SKY);
+    stars(g, t, rt, M);
+    put(g, LAND); if (lost > 0.002) { g.globalAlpha = 0.55 * lost; put(g, LANDD); g.globalAlpha = 1; }   // 透かさずに沈める
+    glints(g, t, rt);
+    smoke(g, t);
+    g.globalAlpha = 1 - lost; put(g, POLE); g.globalAlpha = 1;
+    lights(g, t, rt);
+    echoes(g, t, rt);
+    web(g, t, rt);
+    network(g, t);
+    pool(g, t, rt);
+    ghosts(g, t, rt);
+    lamp(g, t, rt);
+    snow(g, t, rt);
+    // 幻燈：灯のゆらぎ（ともりはじめは大きく）、ガラスの色むら、ほこり、まわりの落ち
+    g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = 1;
+    const fl = 0.035 + 0.03 * Math.sin(rt * 17.3) * Math.sin(rt * 5.1 + 1) + 0.22 * (1 - ss(0.3, 1.8, t)) * (0.5 + 0.5 * Math.sin(rt * 29));
+    g.fillStyle = `rgba(0,0,0,${clamp(fl, 0, 1).toFixed(3)})`; g.fillRect(0, 0, cw, ch);
+    g.globalCompositeOperation = "multiply"; g.fillStyle = "rgba(255,238,214,0.35)"; g.fillRect(0, 0, cw, ch);
+    g.globalCompositeOperation = "soft-light"; g.drawImage(WASH, 0, 0, cw, ch); g.globalCompositeOperation = "source-over";
+    const dr = mulberry(9000 + Math.floor(rt * 6));
+    for (const d of DUST) { if (dr() < 0.55) continue; const px = d.x * S2, py = d.y * S2; g.fillStyle = d.dark ? "rgba(0,0,0,0.5)" : "rgba(255,250,230,0.35)"; if (d.hair) { g.strokeStyle = g.fillStyle; g.lineWidth = 0.8 * S2; g.beginPath(); g.moveTo(px, py); g.quadraticCurveTo(px + 10 * S2 * Math.cos(d.a), py + 6 * S2, px + 18 * S2 * Math.cos(d.a + 0.6), py + 14 * S2 * Math.sin(d.a)); g.stroke(); } else { g.beginPath(); g.arc(px, py, d.r * S2, 0, 6.2832); g.fill(); } }
+    g.drawImage(VIG, 0, 0, cw, ch);
+    // 幻燈の灯の丸：はじめにひらき、終わりに閉じる
+    const ir = irisK(t);
+    if (ir < 0.999) {
+      const closing = t >= IRIS[2], sp = lightPos(t, rt), ox = closing ? M[0] * sp[0] + M[4] : cw / 2, oy = closing ? M[3] * sp[1] + M[5] : ch * 0.47;   // 閉じるときは星のまわりへ
+      const rr = Math.max(1, ir * Math.hypot(cw, ch) * (closing ? 1 : 0.75)), gr = g.createRadialGradient(ox, oy, rr * 0.7, ox, oy, rr);
+      gr.addColorStop(0, "rgba(0,0,0,1)"); gr.addColorStop(1, "rgba(0,0,0,0)");
+      g.globalCompositeOperation = "destination-in"; g.fillStyle = gr; g.fillRect(0, 0, cw, ch);
+      g.globalCompositeOperation = "destination-over"; g.fillStyle = "#000"; g.fillRect(0, 0, cw, ch);
+      g.globalCompositeOperation = "source-over";
+    }
+    // 青い光は、幻燈の灯が閉じても残る
+    g.setTransform(...M); blueLight(g, t, rt); g.setTransform(1, 0, 0, 1, 0, 0);
+  }
+  return { render, pulses: PULSE, ignite: IGN, ignite2: IGN2, lost: LOST, merges: MERGES, star: STAR, irisClose: IRIS[2] };
+})();
+
+/* ===================== 楽譜：春と修羅 序 ===================== */
+// 交流のうなり（東北の 50 ヘルツ）を底に、賢治が弾いたチェロが、ゆっくり考えるように歌う。
+// はじめと終わりに、幻燈にガラス絵を差しこむ・抜く木の音。「青い」の字で澄んだ一音がともり、幽霊が光にとけこむたびに小さな鈴。
+// 明滅の行は、光と同じ拍のはじき音がだんだん速くなる。因果交流の行は、音の粒が左右へ行き来し、二度めの「青い」で和音に集まる。
+// 「その電燈は失はれ」で、うなりがふっと止み、高い弦だけが残る。光が星になるとき、りんが一つ。
+const SHU_GAIN = 1.87;   // ほかの演目（−20 LUFS）にそろえる
+const ShuraScore = {
+  master: [[0, SHU_GAIN], [SHU_END + 8, SHU_GAIN], [SHU_END + 11.8, 0.0001]],
+  setup(E) {
+    E.makeBus("m", { send: 0.4 });
+    E.makeBus("air", { send: 0.3 });
+    E.makeBus("hi", { send: 0.65 });
+    E.makeBus("hum", { send: 0.12, lp: [[0, 520]] });
+    E.makeBus("dry", { send: 0 });   // 幻燈の木の音（短い雑音を残響に送ると割れる）
+  },
+  sustain(E, off) {
+    const T0 = E.T0, at = t => T0 + Math.max(0, t - off), b = E.bus, T = SHU_T, L = i => T.lines[i], END = T.end, D = ShuraScene, c = E.ctx;
+    // 冬の夜の空気
+    if (off < END + 11.5) E.ambience(T0, [[0, 0], [2.5, 1], [END + 9, 1], [END + 11.5, 0]], b.air, 420, 0.1, 0.04);
+    // 交流のうなり：100 と 150 ヘルツ（50 ヘルツの倍音）。ゆっくり脈打ち、「失はれ」で止む
+    const h0 = L(1).t - 0.5, h1 = D.lost + 0.25;
+    if (off < h1) {
+      const w0 = at(h0), w1 = T0 + (h1 - off), g = c.createGain(), lfo = E.osc("sine", 1.6, w0, w1 + 0.5), lg = c.createGain();
+      g.gain.setValueAtTime(0, w0); g.gain.linearRampToValueAtTime(0.07, w0 + (off > h0 ? 0.3 : 3)); g.gain.setValueAtTime(0.07, Math.max(w0 + 0.3, w1 - 0.06)); g.gain.linearRampToValueAtTime(0, w1);
+      lg.gain.value = 0.025; lfo.connect(lg); lg.connect(g.gain);
+      [[100, 1], [150, 0.5], [200, 0.25]].forEach(([f, a]) => { const o = E.osc(f === 150 ? "triangle" : "sine", f, w0, w1 + 0.2), og = c.createGain(); og.gain.value = a; o.connect(og); og.connect(g); });
+      g.connect(b.hum);
+    }
+    // 残る光：高い弦の一本（十行から、灯が閉じるまで）
+    const s0 = D.lost - 0.3, s1 = END + 8;
+    if (off < s1) E.strings(at(s0), T0 + (s1 - off), [81, 88], off > s0 ? 0.5 : 2.2, b.hi, 0.3, 3.5);
+  },
+  build(E) {
+    const ev = [], add = (t, f) => ev.push({ t, f }), b = E.bus, T = SHU_T, L = i => T.lines[i], END = T.end, D = ShuraScene;
+    // 幻燈：ガラス絵を差しこむ木の音。灯がともる
+    add(0.18, w => { E.thud(w, 0.9, b.dry); E.noiseHit(w + 0.012, 0.09, "bandpass", 1500, 1.6, 0.05, 0.05, b.dry); });
+    add(0.5, w => E.crystal(w, 69, 0.16, b.air));
+    // 雪の風
+    [[2.6, 3.2, 0.35], [L(4).t - 1.0, 2.6, 0.28], [L(9).t - 1.0, 2.8, 0.3], [END + 1.4, 3.4, 0.32]].forEach(([t, d, v]) => add(t, w => E.gust(w, d, v, b.air)));
+    // チェロ：イ短調の、考えるような旋律。行の頭で一つずつ
+    const cello = (t, m, d, v = 0.8, pan = -0.1) => add(t, w => E.cello(w, m, d, v, b.m, pan));
+    const C1 = [[0, 45, 57], [1, 47, 60], [2, 48, 64], [3, 45, 62]];   // [行, 低い音, 旋律の音]
+    C1.forEach(([i, lo, hi]) => { const l = L(i), d = l.end - l.t + 0.6; cello(l.t, lo, d, 0.7, -0.15); cello(l.t + 0.3, hi, d - 0.3, 0.6, 0.15); });
+    // 「青」で、澄んだ一音がともる
+    add(D.ignite, w => { E.crystal(w, 88, 0.5, b.hi); E.crystal(w + 0.02, 81, 0.35, b.hi); });
+    // 四行（幽霊）：高い弦がうすく重なり、幽霊が光にとけこむたびに小さな鈴
+    add(L(3).t, w => E.strings(w, w + (L(3).end - L(3).t) + 0.8, [69, 76, 83], 1.0, b.hi, 0.22, 2.0));
+    const BELL = [84, 88, 91, 93, 96, 91, 88, 93, 98, 96, 100, 93];
+    D.merges.forEach((m, i) => add(m, w => E.celesta(w, BELL[i % BELL.length], 0.13, b.hi)));
+    // 五〜七行：明滅の拍。はじき音がだんだん速く
+    D.pulses.forEach((p, i) => add(p, w => E.pluck(w, [81, 76, 81, 84][i % 4], 0.32, b.hi, 0.18, true, i % 2 ? 0.4 : -0.4)));
+    cello(L(4).t, 45, L(6).end - L(4).t + 0.4, 0.75, 0);
+    // 八〜九行：因果交流。音の粒が左右へ行き来し、二度めの「青」で和音に集まる
+    { const t0 = L(7).t, t1 = D.ignite2 - 0.05, notes = [57, 64, 69, 72, 76, 81]; let k = 0; for (let t = t0; t < t1; t += 0.2, k++) { const m = notes[(k * 2 + (k >> 2)) % notes.length], pan = Math.sin(k * 0.7) * 0.85; add(t, w => E.celesta(w, m + 12, 0.32, b.hi)); add(t, w => E.pluck(w, m, 0.12, b.m, 0.4, true, pan)); } }
+    cello(L(7).t, 45, L(8).end - L(7).t + 0.5, 0.7, -0.1); cello(L(8).t, 52, L(8).end - L(8).t + 0.4, 0.6, 0.1);
+    add(D.ignite2, w => { E.crystal(w, 88, 0.42, b.hi); E.crystal(w + 0.02, 81, 0.3, b.hi); E.crystal(w + 0.04, 76, 0.2, b.hi); });
+    // 十行：「失はれ」でうなりが止み、高い一音
+    add(D.lost, w => { E.crystal(w, 93, 0.42, b.hi); E.crystal(w + 0.03, 88, 0.3, b.hi); });
+    add(L(9).t, w => E.cello(w, 45, L(9).end - L(9).t + 1.2, 0.55, b.m, 0));
+    // 光が星になる：りんが一つと、星々のまたたき
+    add(D.star, w => E.rin(w, 0.35, b.hi));
+    [96, 100, 103, 105, 108].forEach((m, i) => add(D.star + 0.3 + i * 0.13, w => E.celesta(w, m, 0.07, b.hi)));
+    // 幻燈の灯が閉じる：ガラス絵を抜く木の音
+    add(D.irisClose, w => { E.noiseHit(w, 0.28, "bandpass", 900, 0.9, 0.03, 0.22, b.dry); E.thud(w + 0.26, 0.7, b.dry); });
+    return ev;
+  }
+};
+
+/* ===================== 演目：春と修羅 序 ===================== */
+{
+  const T = SHU_T, r2 = x => +x.toFixed(2), L = i => T.lines[i];
+  const lines = T.lines.map(l => ({ t: r2(l.t), g: l.g, html: l.html, units: l.units, times: l.times }));
+  POEMS.shura = {
+    id: "shura", title: "春と修羅 序", titleHTML: '春と修羅<span style="font-size:.5em;letter-spacing:0">序</span>', author: "宮沢賢治", year: "1924", dur: T.dur, fs: 32, reveal: "mora",
+    turn: { t: r2(L(4).t), label: "明滅" },
+    meta: `宮沢賢治　『心象スケッチ 春と修羅』（関根書店、1924）序の冒頭の一連　上演 ${Math.floor(T.dur / 60)}:${String(Math.round(T.dur % 60)).padStart(2, "0")}`,
+    aria: "春と修羅 序の映像。雪のふる冬の夜、岩手山のふもとの電信柱に青い光がともり、最後は空へのぼって星になる",
+    lines,
+    groups: [
+      { out: [r2(L(4).t - 1.2), r2(L(4).t - 0.35)], tone: "night" },
+      { out: [r2(L(9).t - 1.2), r2(L(9).t - 0.35)], tone: "night" },
+      { out: [r2(T.end + 4.6), r2(T.end + 5.8)], tone: "night" }
+    ],
+    groupPos: { top: "7%", right: "7%" },
+    titleFade: [3.0, 3.8], credit: [r2(T.end + 8.4), r2(T.end + 9.6)],
+    creditHTML: "宮沢賢治「春と修羅」序（冒頭の一連）<small>『心象スケッチ 春と修羅』（関根書店、1924）による<br>映像と音楽は、この詩のためにコードで作りました</small>",
+    cues: [
+      ["文字", "声に出して読む速さで、一字ずつ現れます。長い序のうち、冒頭の一連（十行）だけを上演します。本文は初版の形で、旧かなづかいです。「いふ」は「いう」、「いつしよに」は「いっしょに」、「せはしく」は「せわしく」、「失はれ」は「うしなわれ」と読みます。"],
+      ["映像", "大正の幻燈（ガラスの絵を灯で映す見世物）のように描きます。はじめに幻燈の灯がまるくひらき、終わりにまた閉じます。序の日付（大正十三年一月）にあわせて、雪のふる冬の夜です。雪の岩手山のふもとに電信柱が続き、そりの道の先に南部の曲り家があります。電信柱の一本に輪郭だけの電燈が描かれ、「青い」で青い光がともります。野の枯れ木や杉、家の人、馬屋の馬、狐や兎、鳥や星から透明な幽霊が離れて、一つずつ光にとけこみます。村の窓や電燈や星がいっせいに明滅し、暗くなる拍には幽霊たちの輪郭がもとの場所に透けます。電線をつたって光の粒が行き来し、窓や木や山や星のあいだに光の糸が張られて、二度めの「青い」で電燈に集まります。最後に電燈と柱は消え、青い光だけが空へのぼって星になります。幻燈の灯が閉じても、その星はしばらく残ります。"],
+      ["音楽", "交流のうなり（東北の 50 ヘルツの倍音）を底に、賢治が弾いたチェロがゆっくり歌います。はじめと終わりに、幻燈にガラス絵を差しこむ・抜く木の音がします。「青い」で澄んだ一音がともり、幽霊が光にとけこむたびに小さな鈴が鳴ります。明滅の行では光と同じ拍のはじき音がだんだん速くなり、因果交流の行は音の粒が左右へ行き来して、二度めの「青い」で和音に集まります。「その電燈は失はれ」でうなりが止み、高い弦だけが残ります。光が星になるとき、りんが一つ鳴ります。"]
+    ],
+    reading: [],
+    rights: "作者は 1933 年に亡くなり、作品は日本でも米国でも著作権の保護期間が終わっています。本文は『心象スケッチ 春と修羅』初版（関根書店、1924 年）の「序」の冒頭の一連です。旧かなづかいのまま、旧字体だけを新字体に改めています（「電燈」の「燈」はそのままにしました）。",
+    scene: ShuraScene, score: ShuraScore
+  };
+}
+
 /* ===================== 演目のデータ ===================== */
-const PROGRAMS = [{ id: "take" }, { id: "karamatsu" }, { id: "tairyo" }, { soon: true, title: "こころ", author: "萩原朔太郎", year: "1913" }];
+const PROGRAMS = [{ id: "take" }, { id: "karamatsu" }, { id: "tairyo" }, { id: "shura" }, ];
 
 /* ===================== 上演の進行 ===================== */
 const $ = id => document.getElementById(id);
@@ -2048,13 +2672,17 @@ function load(id) {
     const d = document.createElement("div"); d.className = "group" + (gr.tone ? " tone-" + gr.tone : "");
     if (P.groupPos && !gr.tone) { d.style.top = P.groupPos.top; d.style.right = P.groupPos.right; }
     if (P.groupPos && gr.tone) { d.style.top = P.groupPos.top; d.style.right = P.groupPos.right; }
+    if (P.groupH) d.style.height = P.groupH;   // 字の列の長さを決めて、長い行は折り返す（駝鳥）
     verse.appendChild(d); return d;
   });
+  // 行の字：l.brk があれば、その字の前で列を折る（長い行。駝鳥）
   lineEls = P.lines.map(l => {
     const s = document.createElement("span"); s.className = "line";
-    if (P.reveal === "mora" && l.units) { s.innerHTML = l.units.map(u => `<span class="ch">${u.html}</span>`).join(""); s._chs = [...s.querySelectorAll(".ch")]; s._times = l.times; s._chs.forEach(c => { c._p = -1; c._rt = c.querySelector("rt"); }); }
+    if (P.reveal === "mora" && l.units) { s.innerHTML = l.units.map((u, k) => (l.brk === k ? "<br>" : "") + `<span class="ch">${u.html}</span>`).join(""); s._chs = [...s.querySelectorAll(".ch")]; s._times = l.times; s._chs.forEach(c => { c._p = -1; c._rt = c.querySelector("rt"); }); }
     else s.innerHTML = l.html;
-    if (l.ind) s.style.paddingInlineStart = `${l.ind * 1.14}em`; groupEls[l.g].appendChild(s); return s;
+    if (l.ind) s.style.paddingInlineStart = `${l.ind * 1.14}em`;
+    if (l.hang) { const e = (l.hang * 1.14).toFixed(2); s.style.paddingInlineStart = `${e}em`; s.style.textIndent = `-${e}em`; s.style.lineHeight = "1.533"; s.style.marginBlock = "-0.2667em"; }   // 折り返した続きは、元の本と同じく下げる。列の間は、行の間と同じに
+    groupEls[l.g].appendChild(s); return s;
   });
   // 演出ノート
   $("noteTitle").textContent = P.title; $("noteMeta").textContent = P.meta;
@@ -2190,7 +2818,7 @@ function frame() {
 }
 
 resize();
-load(POEMS[location.hash.slice(1)] ? location.hash.slice(1) : "tairyo");
+load(POEMS[location.hash.slice(1)] ? location.hash.slice(1) : "shura");
 requestAnimationFrame(frame);
 
 // 確かめ用：指定の秒の絵を出す（音は鳴らさない）
